@@ -6,7 +6,7 @@ import styles from "./admin.module.css";
 const admin_panel = () => {
 
   const [showAddItemFields, setShowAddItemFields] = useState<boolean>(false);
-  const [blob, setBlob] = useState<string[]>([]);
+  const [blob, setBlob] = useState<string>("");
   const [formData, setFormData] = useState({
     productName: "",
     price: 0,
@@ -25,8 +25,8 @@ const admin_panel = () => {
     reader.onload = () => {
       let imageBlob = reader.result;
       if (typeof (imageBlob) === 'string') {
-        setBlob((prev) => [...prev, imageBlob]);
-        setFormData((prev) => ({ ...prev, fileUpload: [...prev.fileUpload, imageBlob] }));
+        setBlob(imageBlob);
+        setFormData((prev) => ({ ...prev, fileUpload: imageBlob }));
       }
     };
 
@@ -48,7 +48,7 @@ const admin_panel = () => {
       description: formData.description,
       category_id: formData.category,
       brand_id: formData.brand,
-      image_base64: formData.fileUpload
+      image_url: formData.fileUpload
     };
 
     try {
@@ -64,7 +64,7 @@ const admin_panel = () => {
         alert(`Error while adding product: ${result.message}`);
         throw new Error('request failed');
       } else {
-        setBlob([]);
+        setBlob("");
         setFormData({
           productName: "",
           price: 0,
@@ -73,7 +73,7 @@ const admin_panel = () => {
           description: "",
           category: "",
           brand: "",
-          fileUpload: []
+          fileUpload: ""
         })
         alert(result.message);
       }
@@ -220,11 +220,7 @@ const admin_panel = () => {
                     <label htmlFor="cover-photo" className="block text-sm/6 font-medium text-white">
                       Add Images
                     </label>
-                    <div style={{ display: "flex", flexDirection: "row", gap: 2 }}>
-                      {blob && blob.map((blob, index) => {
-                        return <img key={index} src={blob} alt="image" width={50} height={50} />
-                      })}
-                    </div>
+                    {blob && <img src={blob} alt="image" width={50} height={50} />}
                     <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10">
                       <div className="text-center">
                         <PhotoIcon aria-hidden="true" className="mx-auto size-12 text-gray-600" />
