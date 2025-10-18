@@ -33,14 +33,54 @@ const admin_panel = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: any) => {
+  const handleFormData = (e: any) => {
     e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    forSubmission();
-  };
+  }
 
-  const forSubmission = () => {
-    console.log('formData from forSubmission', formData);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const obj = {
+      name: formData.productName,
+      price: formData.price,
+      sku: formData.sku,
+      stock_quantity: formData.stockQuantity,
+      description: formData.description,
+      category_id: formData.category,
+      brand_id: formData.brand,
+      image_base64: formData.fileUpload
+    };
+
+    try {
+      const response = await fetch(`http://localhost:5000/product`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(obj)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        alert(`Error while adding product: ${result.message}`);
+        throw new Error('request failed');
+      } else {
+        setBlob([]);
+        setFormData({
+          productName: "",
+          price: 0,
+          sku: "",
+          stockQuantity: 0,
+          description: "",
+          category: "",
+          brand: "",
+          fileUpload: []
+        })
+        alert(result.message);
+      }
+    } catch (err) {
+      console.log("An error has occured", err);
+    };
+
   };
 
   return (
@@ -65,7 +105,7 @@ const admin_panel = () => {
                           type="text"
                           placeholder="Think pad"
                           value={formData.productName}
-                          onChange={(e) => handleSubmit(e)}
+                          onChange={(e) => handleFormData(e)}
                           className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
                         />
                       </div>
@@ -83,7 +123,7 @@ const admin_panel = () => {
                           type="number"
                           placeholder="0.00"
                           value={formData.price}
-                          onChange={(e) => handleSubmit(e)}
+                          onChange={(e) => handleFormData(e)}
                           className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
                         />
                       </div>
@@ -101,7 +141,7 @@ const admin_panel = () => {
                           placeholder="123345678"
                           maxLength={12}
                           value={formData.sku}
-                          onChange={(e) => handleSubmit(e)}
+                          onChange={(e) => handleFormData(e)}
                           className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
                         />
                       </div>
@@ -118,7 +158,7 @@ const admin_panel = () => {
                           type="number"
                           placeholder="0"
                           value={formData.stockQuantity}
-                          onChange={(e) => handleSubmit(e)}
+                          onChange={(e) => handleFormData(e)}
                           className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
                         />
                       </div>
@@ -134,7 +174,7 @@ const admin_panel = () => {
                         name="description"
                         rows={3}
                         value={formData.description}
-                        onChange={(e) => handleSubmit(e)}
+                        onChange={(e) => handleFormData(e)}
                         className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
                       />
                     </div>
@@ -152,7 +192,7 @@ const admin_panel = () => {
                           type="text"
                           placeholder="Mens Clothing etc"
                           value={formData.category}
-                          onChange={(e) => handleSubmit(e)}
+                          onChange={(e) => handleFormData(e)}
                           className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
                         />
                       </div>
@@ -169,7 +209,7 @@ const admin_panel = () => {
                           type="text"
                           placeholder="Mens Clothing etc"
                           value={formData.brand}
-                          onChange={(e) => handleSubmit(e)}
+                          onChange={(e) => handleFormData(e)}
                           className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
                         />
                       </div>
