@@ -1,4 +1,4 @@
-import { Param, Get, BadRequestException, Body, Controller, InternalServerErrorException, Post } from "@nestjs/common";
+import { Param, Get, Body, Controller, InternalServerErrorException, Post, Delete } from "@nestjs/common";
 import { CartService } from "./cart.service";
 
 @Controller('cart')
@@ -20,5 +20,27 @@ export class CartController {
     async getCartItems(@Param('cart_id') cart_id: number) {
         const result = await this.cartService.getCartItems(cart_id);
         return { success: true, payload: result };
+    }
+
+    @Delete('delete_cart/:cart_id')
+    async deleteCart(@Param('cart_id') cart_id: number) {
+        try {
+            const result = await this.cartService.removeCart(cart_id);
+            return { success: true, message: result.message, payload: result.payload };
+        } catch (err) {
+            console.error('Error while deleting cart', err);
+            throw new InternalServerErrorException('Error while deleting cart');
+        };
+    };
+
+    @Delete('delete_item/:cart_item_id')
+    async deleteCartItem(@Param('cart_item_id') cart_item_id: number) {
+        try {
+            const result = await this.cartService.removeCartItem(cart_item_id);
+            return { success: true, message: result.message, payload: result.payload };
+        } catch (err) {
+            console.error('Error while deleting cart item', err);
+            throw new InternalServerErrorException('Error while deleting cart item');
+        }
     }
 }

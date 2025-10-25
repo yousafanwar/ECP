@@ -24,7 +24,7 @@ export class CartService {
         if (itemRes.rowCount > 0) {
           const cart_item_id = itemRes.rows[0].cart_item_id;
 
-          await client.query(`UPDATE cart_items SET quantity = quantity + $1 WHERE cart_item_id = $2 AND cart_id = $3;`, [cart.quantity, cart_item_id, cartId]);
+          await client.query(`UPDATE cart_items SET quantity = $1 WHERE cart_item_id = $2 AND cart_id = $3;`, [cart.quantity, cart_item_id, cartId]);
 
           await client.query('COMMIT');
           return { message: 'Item already exists in cart, quantity updated successfully' };
@@ -56,12 +56,42 @@ export class CartService {
 
   async getCartItems(cart_id) {
     try {
-      const cartItemsRes = await this.dbService.dbPool().query(`select cart_items.cart_item_id, cart_items.product_id, cart_items.quantity, products.name, products.price from cart inner join cart_items on cart.cart_id = cart_items.cart_id inner join products on products.product_id = cart_items.product_id and cart.cart_id = $1;`, [cart_id]);
-      return cartItemsRes.rows;
+      const cartItemsRes = await this.dbService.dbPool().query(`select cart_items.cart_item_id, cart_items.product_id, cart_items.quantity, products.name, products.price , product_images.image_url, product_images.is_hero from cart inner join cart_items on cart.cart_id = cart_items.cart_id inner join products on products.product_id = cart_items.product_id inner join product_images on product_images.product_id = products.product_id and cart.cart_id = $1;`, [cart_id]);
+      const result = cartItemsRes.rows.map((item) => {
+        return {
+          cart_item_id: item.cart_item_id,
+          product_id: item.product_id,
+          quantity: item.quantity,
+          name: item.name,
+          price: item.price * item.quantity,
+          image_url: item.image_url
+        }
+      });
+      return result;
     } catch (err) {
       console.error('Error while retrieving the cart items', err);
       throw err;
     }
 
+  }
+
+  async removeCart(cart_id) {
+    try {
+      const response = await this.dbService.dbPool().query(`DELETE FROM public.cart WHERE cart_id=$1;`, [cart_id]);
+      return response.rows;
+    } catch (err) {
+      console.error('Error while deleting the cart items', err);
+      throw err;
+    }
+  };
+
+  async removeCartItem(cart_item_id) {
+    try {
+      const response = await this.dbService.dbPool().query(`DELETE FROM public.cart_items WHERE cart_item_id=$1;`, [cart_item_id]);
+      return response.rows;
+    } catch (err) {
+      console.error('Error while deleting the cart items', err);
+      throw err;
+    }
   }
 };

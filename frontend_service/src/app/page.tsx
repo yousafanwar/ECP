@@ -3,6 +3,7 @@ import FilterBtn from "./components/buttons/FilterBtn";
 import SortBtn from "./components/buttons/SortBtn";
 import AddToCartBtn from "./components/buttons/AddToCartBtn";
 import BuyNowBtn from "./components/buttons/BuyNow";
+import GoToCartBtn from "./components/buttons/GoToCartBtn";
 
 export default async function Home() {
   const response = await fetch(`http://localhost:5000/product`);
@@ -16,6 +17,7 @@ export default async function Home() {
           <AddProductBtn />
           <FilterBtn />
           <SortBtn />
+          <GoToCartBtn />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
@@ -34,7 +36,7 @@ export default async function Home() {
 
                 <div className="flex justify-between items-center gap-2">
                   <span className="text-xl font-semibold">${ele.price}</span>
-                  <AddToCartBtn />
+                  <AddToCartBtn product_id={ele.product_id} />
                   <BuyNowBtn />
                 </div>
               </div>
