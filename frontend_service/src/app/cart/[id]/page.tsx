@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../cart.module.css";
+import { useDispatch } from "react-redux";
+import { decrementCount, resetCount, removeItem } from "@/app/store/cartSlice";
 
 interface cartItemsArr {
   cart_item_id: number
@@ -14,16 +16,18 @@ interface cartItemsArr {
 
 const Cart = () => {
 
-  const [cartItems, setCartItems] = useState<cartItemsArr[] | []>([]);
+  const [cartItems, setCartItems] = useState<cartItemsArr[]>([]);
   const [priceTotal, setPriceTotal] = useState<number>(0);
   const [refreshCart, setRefreshCart] = useState<boolean>(false);
   const [cartId, setCartId] = useState<number>(0);
-
+  const dispatch = useDispatch();
   const router = useRouter();
+
   useEffect(() => {
     if (localStorage.getItem('cartId')) {
       const storedCartId = localStorage.getItem('cartId');
-      setCartId(storedCartId ? parseInt(storedCartId) : 0);
+      const parsedCartId = storedCartId && parseInt(storedCartId);
+      setCartId(parsedCartId ? parsedCartId : 0);
     }
   }, [])
 
@@ -36,7 +40,6 @@ const Cart = () => {
           return item.price;
         }).reduce((acc: number, ele: any) => acc + ele, 0);
         setCartItems(result.payload);
-        console.log('roral price', totalPrice);
         setPriceTotal(totalPrice);
       } catch (err) {
         console.error('Fetch failed:', err);
@@ -61,7 +64,6 @@ const Cart = () => {
         body: JSON.stringify(obj)
       })
       const result = await response.json();
-      console.log('updateCart result: ', result);
       if (!response.ok) {
         throw new Error("Could not update the cart");
       } else {
@@ -81,15 +83,18 @@ const Cart = () => {
         }
       })
       const result = await response.json();
-      console.log('delete item result: ', result);
+      result.success && alert('Item removed from cart');
       if (!response.ok) {
         throw new Error("Could not delete the cart item");
       } else {
+        dispatch(decrementCount());
         setRefreshCart(!refreshCart);
+        dispatch(removeItem(cartItemId));
       }
       if (cartItems.length === 1) {
         await removeCart(cartId);
         localStorage.removeItem('cartId');
+        dispatch(resetCount());
         router.push('/');
       }
     } catch (err) {
@@ -105,8 +110,6 @@ const Cart = () => {
           'Content-Type': 'application/json',
         }
       })
-      const result = await response.json();
-      console.log('delete cart result: ', result);
       if (!response.ok) {
         throw new Error("Could not delete the cart");
       } else {
@@ -135,9 +138,9 @@ const Cart = () => {
                 <h2 className={styles.cartItemName}>{item.name}</h2>
                 <p className={styles.cartItemPrice}>${item.price}</p>
                 <div className={styles.cartItemQuantity}>
-                  <button onClick={() => { updateCart(--item.quantity, item.product_id) }} className={styles.qtyBtn}>-</button>
+                  <button onClick={() => { updateCart(item.quantity - 1, item.product_id) }} className={styles.qtyBtn}>-</button>
                   <span className={styles.qtyCount}>{item.quantity}</span>
-                  <button onClick={() => { updateCart(++item.quantity, item.product_id) }} className={styles.qtyBtn}>+</button>
+                  <button onClick={() => { updateCart(item.quantity + 1, item.product_id) }} className={styles.qtyBtn}>+</button>
                 </div>
                 <button onClick={() => { removeCartItem(item.cart_item_id) }} className={styles.removeBtn}>Remove</button>
               </div>

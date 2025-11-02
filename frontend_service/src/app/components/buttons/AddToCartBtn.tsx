@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { incrementCount } from '@/app/store/cartSlice';
 
 interface AddToCartProps {
     product_id: number;
@@ -7,24 +8,13 @@ interface AddToCartProps {
 
 const AddToCartBtn = (props: AddToCartProps) => {
 
-    const [cartId, setCartId] = useState<number | null>(null);
-
-    useEffect(() => {
-        if (!cartId) return;
-        const getCartItems = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/cart/${cartId}`);
-                const result = await response.json();
-                localStorage.setItem('cartItemsCount', result.payload.length);
-            } catch (err) {
-                console.error('Fetch failed:', err);
-            }
-        };
-        getCartItems();
-    }, [cartId]);
+    const dispatch = useDispatch();
+    const selector = useSelector((state: any) => state.cartStore.items);
 
     const addItem = async () => {
-
+        if (!selector.includes(props.product_id)) {
+            dispatch(incrementCount(props.product_id));
+        };
         const obj = {
             user_id: "a92f0cb8-69ab-48e9-8d76-3bdc73a7e46c",
             product_id: props.product_id,
@@ -40,10 +30,8 @@ const AddToCartBtn = (props: AddToCartProps) => {
             })
             const result = await response.json();
             if (result?.payload?.cartId) {
-                setCartId(result.payload.cartId);
                 localStorage.setItem('cartId', result.payload.cartId);
             }
-            console.log('add to cart result: ', result);
             if (!response.ok) {
                 throw new Error("Could not update the cart");
             } else {
