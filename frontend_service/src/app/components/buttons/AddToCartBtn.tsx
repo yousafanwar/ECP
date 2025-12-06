@@ -4,6 +4,8 @@ import { incrementCount } from '@/app/store/cartSlice';
 
 interface AddToCartProps {
     product_id: number;
+    className?: string;
+    qty: number;
 }
 
 const AddToCartBtn = (props: AddToCartProps) => {
@@ -18,7 +20,7 @@ const AddToCartBtn = (props: AddToCartProps) => {
         const obj = {
             user_id: "a92f0cb8-69ab-48e9-8d76-3bdc73a7e46c",
             product_id: props.product_id,
-            quantity: 1
+            quantity: props.qty
         };
         try {
             const response = await fetch(`http://localhost:5000/cart`, {

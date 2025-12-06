@@ -1,4 +1,4 @@
-import { Get, Post, Body, Controller, BadRequestException, InternalServerErrorException } from "@nestjs/common";
+import { Get, Post, Body, Controller, BadRequestException, InternalServerErrorException, Param } from "@nestjs/common";
 import { ProductsService } from "./products.service";
 
 
@@ -28,4 +28,16 @@ export class ProductsController {
             throw new InternalServerErrorException('Something went wrong while adding the product');
         }
     }
+
+    @Get(':product_id')
+    async getIndProduct(@Param('product_id') product_id: number) {
+        try {
+            const result = await this.productsService.getIndProduct(product_id);
+            return { success: true, message: 'Product fetched successfully', payload: result };
+        } catch (err) {
+            console.error(err)
+            throw new InternalServerErrorException('Something went wrong while fetching the product');
+        }
+    }
+
 };

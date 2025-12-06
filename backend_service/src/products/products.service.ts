@@ -39,4 +39,14 @@ export class ProductsService {
             throw err;
         };
     }
+
+    async getIndProduct(productId) {
+        try {
+            const response = await this.pool.dbPool().query(`SELECT products.name, products.price, products.sku, products.stock_quantity, products.description, products.category_id, products.brand_id, products.created_at, products.updated_at, product_images.image_id, product_images.image_url, product_images.is_hero FROM public.products inner join public.product_images on products.product_id = product_images.product_id where products.product_id = $1;`, [productId]);
+            return response.rows;
+        } catch (err) {
+            console.error('Error while fetching products:', err);
+            throw err;
+        }
+    }
 }
