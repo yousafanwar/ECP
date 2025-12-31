@@ -8,6 +8,7 @@ export class DbController {
 
     @Get()
     connectDB() {
+        console.log('Connecting to database...');
         return this.dbService.dbPool();
     };
 

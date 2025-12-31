@@ -10,7 +10,7 @@ export class ProductsController {
     async getProducts() {
         try {
             const result = await this.productsService.getAllProducts();
-            return { success: true, message: 'Products retreived successfuly', payload: result };
+            return { success: true, message: 'Products retrieved successfully', payload: result };
         } catch (err) {
             throw new InternalServerErrorException('Something went wrong while fetching the products')
         }

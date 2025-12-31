@@ -2,11 +2,12 @@
 import { useState } from "react";
 import { PhotoIcon } from '@heroicons/react/24/solid'
 import styles from "./admin.module.css";
+import { CldUploadButton } from 'next-cloudinary';
 
 const admin_panel = () => {
 
   const [showAddItemFields, setShowAddItemFields] = useState<boolean>(false);
-  const [blob, setBlob] = useState<string>("");
+  const [imageThumbnail, setImageThumbnail] = useState<string>("");
   const [formData, setFormData] = useState({
     productName: "",
     price: 0,
@@ -15,22 +16,18 @@ const admin_panel = () => {
     description: "",
     category: "",
     brand: "",
-    fileUpload: blob
+    fileUpload: "",
+    imagePublicId: ""
   });
 
   const handleFileUpload = (e: any) => {
-    let file = e.target.files[0];
-    let reader = new FileReader();
+    const publicId = e.info.public_id;
+    const imageUrl = e.info.secure_url;
+    const thumbnail = e.info.thumbnail_url;
+    setFormData((prev) => ({ ...prev, fileUpload: imageUrl, imagePublicId: publicId }));
+    setImageThumbnail(thumbnail);
 
-    reader.onload = () => {
-      let imageBlob = reader.result;
-      if (typeof (imageBlob) === 'string') {
-        setBlob(imageBlob);
-        setFormData((prev) => ({ ...prev, fileUpload: imageBlob }));
-      }
-    };
-
-    reader.readAsDataURL(file);
+    console.log("Upload successful! Public ID:", publicId, "Image URL:", imageUrl);
   };
 
   const handleFormData = (e: any) => {
@@ -48,7 +45,8 @@ const admin_panel = () => {
       description: formData.description,
       category_id: formData.category,
       brand_id: formData.brand,
-      image_url: formData.fileUpload
+      image_url: formData.fileUpload,
+      imagePublicId: formData.imagePublicId
     };
 
     try {
@@ -64,7 +62,7 @@ const admin_panel = () => {
         alert(`Error while adding product: ${result.message}`);
         throw new Error('request failed');
       } else {
-        setBlob("");
+        setImageThumbnail("");
         setFormData({
           productName: "",
           price: 0,
@@ -73,7 +71,8 @@ const admin_panel = () => {
           description: "",
           category: "",
           brand: "",
-          fileUpload: ""
+          fileUpload: "",
+          imagePublicId: ""
         })
         alert(result.message);
       }
@@ -220,7 +219,7 @@ const admin_panel = () => {
                     <label htmlFor="cover-photo" className="block text-sm/6 font-medium text-white">
                       Add Images
                     </label>
-                    {blob && <img src={blob} alt="image" width={50} height={50} />}
+                    {imageThumbnail && <img src={imageThumbnail} alt="image" width={50} height={50} />}
                     <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10">
                       <div className="text-center">
                         <PhotoIcon aria-hidden="true" className="mx-auto size-12 text-gray-600" />
@@ -229,8 +228,7 @@ const admin_panel = () => {
                             htmlFor="file-upload"
                             className="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-400 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigo-500 hover:text-indigo-300"
                           >
-                            <span>Upload a file</span>
-                            <input onChange={(e) => { handleFileUpload(e) }} id="file-upload" name="fileUpload" type="file" className="sr-only" />
+                            <CldUploadButton uploadPreset="ecp_products" onSuccess={(result) => handleFileUpload(result)}/>
                           </label>
                           <p className="pl-1">or drag and drop</p>
                         </div>

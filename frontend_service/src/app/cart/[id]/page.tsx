@@ -19,15 +19,14 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState<cartItemsArr[]>([]);
   const [priceTotal, setPriceTotal] = useState<number>(0);
   const [refreshCart, setRefreshCart] = useState<boolean>(false);
-  const [cartId, setCartId] = useState<number>(0);
+  const [cartId, setCartId] = useState<string | null>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
   useEffect(() => {
     if (localStorage.getItem('cartId')) {
       const storedCartId = localStorage.getItem('cartId');
-      const parsedCartId = storedCartId && parseInt(storedCartId);
-      setCartId(parsedCartId ? parsedCartId : 0);
+      setCartId(storedCartId);
     }
   }, [])
 
@@ -51,7 +50,7 @@ const Cart = () => {
   const updateCart = async (item: number, product_id: number) => {
 
     const obj = {
-      user_id: "a92f0cb8-69ab-48e9-8d76-3bdc73a7e46c",
+      user_id: "90759e0a-654a-4f75-ba11-1a8d31973a39",
       product_id: product_id,
       quantity: item
     };
@@ -102,7 +101,7 @@ const Cart = () => {
     }
   };
 
-  const removeCart = async (cartId: number) => {
+  const removeCart = async (cartId: string | null) => {
     try {
       const response = await fetch(`http://localhost:5000/cart/delete_cart/${cartId}`, {
         method: 'DELETE',
