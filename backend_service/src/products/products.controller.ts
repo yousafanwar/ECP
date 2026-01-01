@@ -17,7 +17,7 @@ export class ProductsController {
     };
 
     @Post()
-    async addProduct(@Body() product: { name: string, price: number, sku: number, stock_quantity: number, description: string, category_id: number, brand_id: string, image_url: string, is_hero: boolean }) {
+    async addProduct(@Body() product: { name: string, price: number, sku: number, stock_quantity: number, description: string, category_id: string, brand_id: string, image_url: string, is_hero: boolean }) {
         try {
             const result = await this.productsService.addProduct(product);
             return { success: true, message: 'Product added successfully', payload: result };

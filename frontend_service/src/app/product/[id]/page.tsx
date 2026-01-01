@@ -44,7 +44,7 @@ const ProductPage = ({ params }: { params: { id: number } }) => {
             </div>
           </div>
           <div className={styles.detailsSection}>
-            <h1 className={styles.productTitle}>{result.name}</h1>
+            <h1 className={styles.productTitle}>{result.product_title}</h1>
             <p className={styles.productPrice}>${result.price}</p>
             <p className={styles.productDescription}>
               {result.description}
@@ -57,8 +57,9 @@ const ProductPage = ({ params }: { params: { id: number } }) => {
             <AddToCartBtn product_id={productId} qty={productQty} />
             <button className={styles.goToCartBtn} onClick={navigateToCart}>Go to Cart</button>
             <div className={styles.productMeta}>
-              <span><strong>Category:</strong> {result.category}</span>
-              <span><strong>Brand:</strong> {result.brand}</span>
+              <span><strong>Category:</strong> {result.category_title}</span>
+              <span><strong>Brand:</strong> {result.brand_title}</span>
+              <span><strong>About the Brand:</strong> {result.brand_description}</span>
               <span><strong>SKU:</strong> {result.sku}</span>
             </div>
           </div>

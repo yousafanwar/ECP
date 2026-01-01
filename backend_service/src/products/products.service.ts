@@ -6,7 +6,7 @@ export class ProductsService {
 
     constructor(private readonly pool: DbService) { };
 
-    async addProduct(@Body() product: { name: string, price: number, sku: number, stock_quantity: number, description: string, category_id: number, brand_id: string, image_url: string, is_hero: boolean }) {
+    async addProduct(@Body() product: { name: string, price: number, sku: number, stock_quantity: number, description: string, category_id: string, brand_id: string, image_url: string, is_hero: boolean }) {
         const client = await this.pool.dbPool().connect();
 
         try {
@@ -42,7 +42,7 @@ export class ProductsService {
 
     async getIndProduct(productId) {
         try {
-            const response = await this.pool.dbPool().query(`SELECT products.name, products.price, products.sku, products.stock_quantity, products.description, products.category_id, products.brand_id, products.created_at, products.updated_at, product_images.image_id, product_images.image_url, product_images.is_hero FROM public.products inner join public.product_images on products.product_id = product_images.product_id where products.product_id = $1;`, [productId]);
+            const response = await this.pool.dbPool().query(`SELECT products.name as product_title, products.price, products.sku, products.stock_quantity, products.description, products.category_id, products.brand_id, products.created_at, products.updated_at, product_images.image_id, product_images.image_url, product_images.is_hero, brands.name as brand_title, brands.description as brand_description, categories.name as category_title FROM public.products inner join public.product_images on products.product_id = product_images.product_id inner join public.categories on products.category_id = categories.category_id inner join public.brands on products.brand_id = brands.brand_id where products.product_id = $1;`, [productId]);
             return response.rows;
         } catch (err) {
             console.error('Error while fetching products:', err);
