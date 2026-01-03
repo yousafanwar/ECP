@@ -1,24 +1,29 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 //import type { User } from 'src/interfaces';
 import { UsersService } from './users.service';
 //import { ConfigService } from '@nestjs/config';
+import { FetchUser } from './interface';
+import { createNewUserDTO } from './dto';
 
 @Controller('users')
 export class UsersController {
 
     constructor(
         private userService: UsersService,
-  //      private configService: ConfigService
-    ){};
+    ) { };
 
     @Get()
-    getAllUsers(){
+    getAllUsers(): Promise<FetchUser[]> {
         return this.userService.getAllUsers();
     }
 
-    @Post()
-    addUser(@Body() userData: {first_name: string, last_name: string, email: string, "password": string, is_deleted: boolean}){
-        return this.userService.addUser(userData);
+    @Get(':id')
+    getIntUser(@Param('id') userId: string): Promise<FetchUser> {
+        return this.userService.getIndUser(userId);
     }
 
+    @Post()
+    createNewUser(@Body() userData: createNewUserDTO) {
+        return this.userService.addUser(userData);
+    }
 }

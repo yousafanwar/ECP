@@ -8,7 +8,6 @@ export default async function Home() {
   const response = await fetch(`http://localhost:5000/product`);
   const result = await response.json();
 
-
   return (
     <>
       <h1 className="text-2xl font-semibold mb-6">Products</h1>
@@ -21,7 +20,7 @@ export default async function Home() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
-        {result.payload && result.payload.map((ele: any) => {
+        {result && result.map((ele: any) => {
           return (
             <ProductCard product={ele} key={ele.product_id} />
           )

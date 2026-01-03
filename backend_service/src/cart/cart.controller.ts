@@ -17,13 +17,13 @@ export class CartController {
     }
 
     @Get(':cart_id')
-    async getCartItems(@Param('cart_id') cart_id: number) {
+    async getCartItems(@Param('cart_id') cart_id: string) {
         const result = await this.cartService.getCartItems(cart_id);
         return { success: true, payload: result };
     }
 
     @Delete('delete_cart/:cart_id')
-    async deleteCart(@Param('cart_id') cart_id: number) {
+    async deleteCart(@Param('cart_id') cart_id: string) {
         try {
             const result = await this.cartService.removeCart(cart_id);
             return { success: true, message: result.message, payload: result.payload };
@@ -34,7 +34,7 @@ export class CartController {
     };
 
     @Delete('delete_item/:cart_item_id')
-    async deleteCartItem(@Param('cart_item_id') cart_item_id: number) {
+    async deleteCartItem(@Param('cart_item_id') cart_item_id: string) {
         try {
             const result = await this.cartService.removeCartItem(cart_item_id);
             return { success: true, message: result.message, payload: result.payload };

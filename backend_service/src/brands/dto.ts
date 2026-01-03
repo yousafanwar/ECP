@@ -1,16 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength, IsUUID, IsOptional } from "class-validator";
-
-export class FetchAllBrandsDTO {
-    @IsUUID()
-    brand_id: string;
-
-    @IsString()
-    @MaxLength(255)
-    name: string;
-
-    @IsString()
-    description: string;
-}
+import { IsNotEmpty, IsString } from "class-validator";
 
 export class CreateBrandDTO {
     @IsNotEmpty()

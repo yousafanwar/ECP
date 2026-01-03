@@ -109,7 +109,7 @@ const admin_panel = () => {
       const response = await fetch('http://localhost:5000/categories');
       const result = await response.json();
       setLoading((prev) => ({ ...prev, category: false }));
-      setCategories(result.payload);
+      setCategories(result);
     } catch (err) {
       console.error(err);
     };
@@ -121,8 +121,8 @@ const admin_panel = () => {
       const response = await fetch('http://localhost:5000/brands');
       const result = await response.json();
       setLoading((prev) => ({ ...prev, brand: false }));
-      console.log('Brands fetched:', result.payload);
-      setBrands(result.payload);
+      console.log('Brands fetched:', result);
+      setBrands(result);
     } catch (err) {
       console.error(err);
     };
@@ -132,6 +132,7 @@ const admin_panel = () => {
     <>
       {loading.fullPage && <FullPageSpinner />}
       <h1 className={styles.header}>Admin panel</h1>
+      <h1 className={styles.header}>Welcome to the control room, Mr. President!</h1>
       <button className={styles.addBtn} onClick={() => setShowAddItemFields(true)}>Add new item</button>
       {showAddItemFields && <>
         <form onSubmit={handleSubmit}>

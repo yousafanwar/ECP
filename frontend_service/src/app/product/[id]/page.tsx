@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect } from "react";
-import { productData } from "@/interfaces";
+import { ProductData } from "@/interfaces";
 import styles from "../product.module.css";
 import AddToCartBtn from "@/app/components/buttons/AddToCartBtn";
 import { useRouter } from "next/navigation";
 
 const ProductPage = ({ params }: { params: { id: number } }) => {
 
-  const [result, setResult] = useState<productData | null>(null);
+  const [result, setResult] = useState<ProductData | null>(null);
   const [productQty, setProductQty] = useState<number>(1);
   const [productId, setProductId] = useState<number>(0);
   const router = useRouter();
@@ -18,7 +18,7 @@ const ProductPage = ({ params }: { params: { id: number } }) => {
       const { id } = await params;
       const response = await fetch(`http://localhost:5000/product/${id}`);
       const data = await response.json();
-      setResult(data.payload[0]);
+      setResult(data);
       setProductId(id);
     };
 
@@ -37,7 +37,7 @@ const ProductPage = ({ params }: { params: { id: number } }) => {
       {result &&
         <div className={styles.productContainer}>
           <div className={styles.imageSection}>
-            <img src={result.image_url} alt="Product" className={styles.mainImage} />
+            <img src={result.heroImageData.image_url} alt="Product" className={styles.mainImage} />
             <div className={styles.thumbnailRow}>
               <img src="/images/sample.jpg" className={styles.thumbnail} />
               <img src="/images/sample2.jpg" className={styles.thumbnail} />

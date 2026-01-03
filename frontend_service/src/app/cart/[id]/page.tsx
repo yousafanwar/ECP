@@ -6,10 +6,10 @@ import { useDispatch } from "react-redux";
 import { decrementCount, resetCount, removeItem } from "@/app/store/cartSlice";
 
 interface cartItemsArr {
-  cart_item_id: number
+  cart_item_id: string;
   name: string;
   price: number;
-  product_id: number;
+  product_id: string;
   quantity: number;
   image_url: string;
 }
@@ -47,7 +47,7 @@ const Cart = () => {
     getCartItems();
   }, [refreshCart, cartId]);
 
-  const updateCart = async (item: number, product_id: number) => {
+  const updateCart = async (item: number, product_id: string) => {
 
     const obj = {
       user_id: "90759e0a-654a-4f75-ba11-1a8d31973a39",
@@ -73,7 +73,7 @@ const Cart = () => {
     }
   };
 
-  const removeCartItem = async (cartItemId: number) => {
+  const removeCartItem = async (cartItemId: string) => {
     try {
       const response = await fetch(`http://localhost:5000/cart/delete_item/${cartItemId}`, {
         method: 'DELETE',
