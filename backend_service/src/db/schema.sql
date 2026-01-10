@@ -101,6 +101,8 @@ create table if not exists orders(
 	foreign key (address_id) references address(address_id) 
 );
 
+alter table orders drop column total_amount;
+
 -- order items table
 create table if not exists order_items( 
 	order_item_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL, 

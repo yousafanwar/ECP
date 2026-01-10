@@ -94,4 +94,14 @@ export class CartService {
       throw err;
     }
   }
+
+  async getUserCart(user_id) {
+    try {
+      const cartRes = await this.dbService.dbPool().query(`SELECT cart_id FROM public.cart where user_id = $1;`, [user_id]);
+      return cartRes.rows[0];
+    } catch (err) {
+      console.error('Error while retrieving the cart', err);
+      throw err;
+    }
+  }
 };

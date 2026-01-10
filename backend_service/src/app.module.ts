@@ -8,9 +8,10 @@ import { ProductsModule } from './products/products.module';
 import { cartModule } from './cart/cart.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BrandsModule } from './brands/brands.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
-  imports: [UsersModule, DbModule, ProductsModule, cartModule, CategoriesModule, BrandsModule, ConfigModule.forRoot({ isGlobal: true })],
+  imports: [UsersModule, DbModule, ProductsModule, cartModule, CategoriesModule, BrandsModule, OrdersModule, ConfigModule.forRoot({ isGlobal: true })],
   controllers: [AppController],
   providers: [AppService],
 })

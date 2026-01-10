@@ -16,6 +16,17 @@ export class CartController {
         }
     }
 
+    // fetch cart for the loggedIn user
+    @Get('user/:user_id')
+    async getUserCart(@Param('user_id') user_id: string){
+        try{
+            const result = await this.cartService.getUserCart(user_id);
+            return { success: true, message: result.message, payload: result };
+        }catch(err){
+            throw new InternalServerErrorException('Error while fetching the cart');
+        }
+    }
+
     @Get(':cart_id')
     async getCartItems(@Param('cart_id') cart_id: string) {
         const result = await this.cartService.getCartItems(cart_id);

@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { ProductData } from "@/interfaces";
+import { ProductData } from "@/app/interfaces";
 import styles from "../product.module.css";
 import AddToCartBtn from "@/app/components/buttons/AddToCartBtn";
 import { useRouter } from "next/navigation";

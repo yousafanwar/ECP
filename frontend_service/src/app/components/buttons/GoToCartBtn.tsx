@@ -13,19 +13,14 @@ const GoToCartBtn = () => {
     const selector = useSelector((state: any) => state.cartStore.count);
 
     useEffect(() => {
-        let parsedCount = Number(localStorage.getItem('cartItemsCount')) || 0;
-        let reducerCartCount = selector !== 0 ? Math.max(parsedCount, selector) : (parsedCount + selector);
-        setCartCount(reducerCartCount);
-    }, [selector])
+        const getCart = async () => {
+            let cartResponse = await fetch(`http://localhost:5000/cart/user/90759e0a-654a-4f75-ba11-1a8d31973a39`);
+            let result = await cartResponse.json();
+            setCartId(result?.payload?.cart_id);
+        };
 
-    useEffect(() => {
-        if (localStorage.getItem('cartId')) {
-            const storedCartId = localStorage.getItem('cartId');
-            const parsedId = storedCartId ? parseInt(storedCartId) : 0;
-            setCartId(parsedId);
-            // setCartExists(true);
-        }
-    }, [])
+        getCart();
+    }, []);
 
     useEffect(() => {
         if (!cartId) return;
@@ -45,10 +40,8 @@ const GoToCartBtn = () => {
     }, [cartId, selector]);
 
     const navigateToCart = () => {
-        const storesCartId = localStorage.getItem('cartId');
-        if (storesCartId) {
-            router.push(`/cart/${parseInt(storesCartId)}`);
-        }
+
+            router.push(`/cart/${cartId}`);
     };
 
     return (

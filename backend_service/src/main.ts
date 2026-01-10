@@ -1,10 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as bodyParser from 'body-parser';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Enable HTTP request logging
+  app.use((req, res, next) => {
+    const logger = new Logger('HTTP');
+    const { method, originalUrl } = req;
+    const start = Date.now();
+    
+    res.on('finish', () => {
+      const elapsed = Date.now() - start;
+      logger.log(`${method} ${originalUrl} - ${res.statusCode} (${elapsed}ms)`);
+    });
+    
+    next();
+  });
+
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
