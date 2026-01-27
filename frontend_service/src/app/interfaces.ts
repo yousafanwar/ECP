@@ -14,8 +14,29 @@ export interface ProductData {
     updated_at: string;
 }
 
+export interface cartItemsArr {
+    cart_item_id: string;
+    name: string;
+    price: number;
+    product_id: string;
+    quantity: number;
+    image_url: string;
+}
+
 export interface HeroImage {
     image_id: string;
     image_url: string;
     is_hero: boolean;
+}
+
+export interface CartCountResponse {
+    success: boolean;
+    message: string;
+    payload: updateCartPayload;
+}
+
+export interface updateCartPayload {
+    totalCartQty: number;
+    updatedItemQty: number;
+    CalCartPrice: number;
 }

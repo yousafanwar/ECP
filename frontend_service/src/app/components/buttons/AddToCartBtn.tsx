@@ -1,9 +1,10 @@
 'use client';
 import { useDispatch, useSelector } from "react-redux";
-import { incrementCount } from '@/app/store/cartSlice';
+import { addItem, updateCount } from '@/app/store/cartSlice';
+import { restoreCartCount } from '@/app/helperFunctions';
 
 interface AddToCartProps {
-    product_id: number;
+    product_id: string;
     className?: string;
     qty: number;
 }
@@ -13,9 +14,14 @@ const AddToCartBtn = (props: AddToCartProps) => {
     const dispatch = useDispatch();
     const selector = useSelector((state: any) => state.cartStore.items);
 
-    const addItem = async () => {
+    const getCartCount = async (cartId: string) => {
+        const cartCount = await restoreCartCount(cartId);
+        dispatch(updateCount(cartCount ?? 0));
+    }
+
+    const addItemToCart = async () => {
         if (!selector.includes(props.product_id)) {
-            dispatch(incrementCount(props.product_id));
+            dispatch(addItem(props.product_id));
         };
         const obj = {
             user_id: "90759e0a-654a-4f75-ba11-1a8d31973a39",
@@ -31,6 +37,7 @@ const AddToCartBtn = (props: AddToCartProps) => {
                 body: JSON.stringify(obj)
             })
             const result = await response.json();
+            getCartCount(result.payload.cartId);
             if (result?.payload?.cartId) {
                 localStorage.setItem('cartId', result.payload.cartId);
             }
@@ -45,7 +52,7 @@ const AddToCartBtn = (props: AddToCartProps) => {
     };
 
     return (
-        <button onClick={addItem} className="cursor-pointer bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-2 rounded-lg text-sm transition-colors">
+        <button onClick={addItemToCart} className="cursor-pointer bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-2 rounded-lg text-sm transition-colors">
             Add to Cart
         </button>
     )

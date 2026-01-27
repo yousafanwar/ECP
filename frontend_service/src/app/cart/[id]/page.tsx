@@ -3,41 +3,37 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../cart.module.css";
 import { useDispatch } from "react-redux";
-import { decrementCount, resetCount, removeItem } from "@/app/store/cartSlice";
-
-interface cartItemsArr {
-  cart_item_id: string;
-  name: string;
-  price: number;
-  product_id: string;
-  quantity: number;
-  image_url: string;
-}
+import { resetCount, removeItem } from "@/app/store/cartSlice";
+import { cartItemsArr } from "@/app/interfaces";
+import { updateCart } from "@/app/helperFunctions";
 
 const Cart = () => {
 
   const [cartItems, setCartItems] = useState<cartItemsArr[]>([]);
   const [priceTotal, setPriceTotal] = useState<number>(0);
   const [refreshCart, setRefreshCart] = useState<boolean>(false);
-  const [cartId, setCartId] = useState<string | null>("");
+  const [cartId, setCartId] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
 
   useEffect(() => {
     if (localStorage.getItem('cartId')) {
       const storedCartId = localStorage.getItem('cartId');
-      setCartId(storedCartId);
+      setCartId(storedCartId!);
     }
   }, [])
 
   useEffect(() => {
     const getCartItems = async () => {
+      if (!cartId) return;
       try {
         const response = await fetch(`http://localhost:5000/cart/${cartId}`);
         const result = await response.json();
-        let totalPrice = result.payload.map((item: cartItemsArr) => {
-          return item.price;
-        }).reduce((acc: number, ele: any) => acc + ele, 0);
+        const totalPrice = result.payload.reduce(
+          (acc: number, item: cartItemsArr) =>
+            acc + item.price * item.quantity,
+          0
+        );
         setCartItems(result.payload);
         setPriceTotal(totalPrice);
       } catch (err) {
@@ -47,35 +43,9 @@ const Cart = () => {
     getCartItems();
   }, [refreshCart, cartId]);
 
-  const updateCart = async (item: number, product_id: string) => {
-
-    const obj = {
-      user_id: "90759e0a-654a-4f75-ba11-1a8d31973a39",
-      product_id: product_id,
-      quantity: item
-    };
+  const removeCartItem = async (cartItem: any) => {
     try {
-      const response = await fetch(`http://localhost:5000/cart`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(obj)
-      })
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error("Could not update the cart");
-      } else {
-        setRefreshCart(!refreshCart);
-      }
-    } catch (err) {
-      console.error("Error while updating the cart", err);
-    }
-  };
-
-  const removeCartItem = async (cartItemId: string) => {
-    try {
-      const response = await fetch(`http://localhost:5000/cart/delete_item/${cartItemId}`, {
+      const response = await fetch(`http://localhost:5000/cart/delete_item/${cartItem.cart_item_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -86,9 +56,8 @@ const Cart = () => {
       if (!response.ok) {
         throw new Error("Could not delete the cart item");
       } else {
-        dispatch(decrementCount());
         setRefreshCart(!refreshCart);
-        dispatch(removeItem(cartItemId));
+        dispatch(removeItem(cartItem.cart_item_id));
       }
       if (cartItems.length === 1) {
         await removeCart(cartId);
@@ -120,6 +89,25 @@ const Cart = () => {
     }
   };
 
+  const updateCartCount = async (product_id: string, cart_item_id: string, opType: string) => {
+    const response = await updateCart(product_id, cart_item_id, opType, cartId);
+    console.log({ 'cartCount should we render this???': response, 'response.payload.updatedItemQty: ': response.payload.updatedItemQty });
+
+
+    // Update the local cartItems state
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.cart_item_id === cart_item_id
+          ? { ...item, quantity: response.payload.updatedItemQty }
+          : item
+      )
+    );
+    console.log('total price in cart: ', response.payload.CalCartPrice);
+
+    setPriceTotal(response.payload.CalCartPrice);
+
+  };
+
   return (
     <div className={styles.cartContainer}>
       <h1 className={styles.cartTitle}>Your Shopping Cart</h1>
@@ -137,11 +125,11 @@ const Cart = () => {
                 <h2 className={styles.cartItemName}>{item.name}</h2>
                 <p className={styles.cartItemPrice}>${item.price}</p>
                 <div className={styles.cartItemQuantity}>
-                  <button onClick={() => { updateCart(item.quantity - 1, item.product_id) }} className={styles.qtyBtn}>-</button>
+                  <button onClick={() => { updateCartCount(item.product_id, item.cart_item_id, 'decrement') }} className={styles.qtyBtn}>-</button>
                   <span className={styles.qtyCount}>{item.quantity}</span>
-                  <button onClick={() => { updateCart(item.quantity + 1, item.product_id) }} className={styles.qtyBtn}>+</button>
+                  <button onClick={() => { updateCartCount(item.product_id, item.cart_item_id, 'increment') }} className={styles.qtyBtn}>+</button>
                 </div>
-                <button onClick={() => { removeCartItem(item.cart_item_id) }} className={styles.removeBtn}>Remove</button>
+                <button onClick={() => { removeCartItem(item) }} className={styles.removeBtn}>Remove</button>
               </div>
             </div>
           ))}
@@ -162,6 +150,7 @@ const Cart = () => {
             <span>${priceTotal + 30}</span>
           </div>
           <button className={styles.checkoutBtn}>Proceed to Checkout</button>
+          <button onClick={() => { router.push('/') }}>Continue Shopping</button>
         </div>
       </div>
     </div>

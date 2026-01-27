@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 interface cartState {
-    items: number[];
+    items: string[];
     count: number;
 }
 
@@ -14,12 +14,11 @@ const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        incrementCount(state, action) {
-            state.items.push(action.payload);
-            state.count += 1;
+        updateCount(state, action) {
+            state.count = action.payload;
         },
-        decrementCount(state) {
-            state.count -= 1;
+        addItem(state, action) {
+            state.items.push(action.payload);
         },
         removeItem(state, action) {
             state.items = state.items.filter(id => id !== action.payload);
@@ -32,5 +31,5 @@ const cartSlice = createSlice({
     }
 });
 
-export const { incrementCount, decrementCount, resetCount, removeItem } = cartSlice.actions;
+export const { addItem, updateCount, resetCount, removeItem } = cartSlice.actions;
 export default cartSlice.reducer;
