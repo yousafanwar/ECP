@@ -20,10 +20,10 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
       const { id } = await params;
       const response = await fetch(`http://localhost:5000/product/${id}`);
       const data = await response.json();
-      if (data.stock_quantity <= 3) {
+      if (data.payload.stock_quantity <= 3) {
         setLowQty(true)
       };
-      setResult(data);
+      setResult(data.payload);
       setProductId(id);
     };
 
@@ -44,7 +44,7 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
       if (!response.ok) {
         throw new Error('Failed to get stock quantity');
       }
-      return result
+      return result.payload
     } catch (err) {
       throw new Error(`Stock check failed: ${err}`);
     }

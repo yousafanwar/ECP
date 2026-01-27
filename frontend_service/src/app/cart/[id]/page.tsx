@@ -91,7 +91,6 @@ const Cart = () => {
 
   const updateCartCount = async (product_id: string, cart_item_id: string, opType: string) => {
     const response = await updateCart(product_id, cart_item_id, opType, cartId);
-    console.log({ 'cartCount should we render this???': response, 'response.payload.updatedItemQty: ': response.payload.updatedItemQty });
 
 
     // Update the local cartItems state

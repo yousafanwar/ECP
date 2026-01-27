@@ -20,7 +20,7 @@ export default async function Home() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-6">
-        {result && result.map((ele: any) => {
+        {result.payload && result.payload.map((ele: any) => {
           return (
             <ProductCard product={ele} key={ele.product_id} />
           )

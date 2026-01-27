@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 //import { ConfigService } from '@nestjs/config';
 import { FetchUser } from './interface';
 import { createNewUserDTO } from './dto';
+import { ApiResponse } from 'src/common';
 
 @Controller('users')
 export class UsersController {
@@ -13,17 +14,20 @@ export class UsersController {
     ) { };
 
     @Get()
-    getAllUsers(): Promise<FetchUser[]> {
-        return this.userService.getAllUsers();
+    async getAllUsers(): Promise<ApiResponse<FetchUser[]>> {
+        const result = await this.userService.getAllUsers();
+        return new ApiResponse(true, 'Users retrieved successfully', result);
     }
 
     @Get(':id')
-    getIntUser(@Param('id') userId: string): Promise<FetchUser> {
-        return this.userService.getIndUser(userId);
+    async getIntUser(@Param('id') userId: string): Promise<ApiResponse<FetchUser>> {
+        const result = await this.userService.getIndUser(userId);
+        return new ApiResponse(true, 'User retrieved successfully', result);
     }
 
     @Post()
-    createNewUser(@Body() userData: createNewUserDTO) {
-        return this.userService.addUser(userData);
+    async createNewUser(@Body() userData: createNewUserDTO): Promise<ApiResponse> {
+        const result = await this.userService.addUser(userData);
+        return new ApiResponse(true, 'User created successfully', result);
     }
 }
