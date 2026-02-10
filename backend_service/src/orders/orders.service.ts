@@ -1,6 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { DbService } from "src/db/db.service";
-import { OrderItems } from "./interface";
 
 @Injectable()
 export class OrdersService {
@@ -105,5 +104,54 @@ export class OrdersService {
             client.release();
         }
 
+    };
+
+    async getOrderByOrderId(order_id) {
+        try {
+            const orderAddressRes = await this.pool.dbPool().query(`select address.street, address.city, address.state, address.country, address."type"   
+                from address inner join orders on address.address_id = orders.address_id
+                where orders.order_id = $1;`, [order_id]);
+
+            const orderAddress = orderAddressRes.rows[0];
+            console.log('orderItemsRes', orderAddressRes.rows[0]);
+
+            const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, products.name, products.price , product_images.image_url, product_images.is_hero 
+            from orders inner join order_items on orders.order_id = order_items.order_id 
+            inner join products on products.product_id = order_items.product_id 
+            inner join product_images 
+            on product_images.product_id = products.product_id and orders.order_id = $1;`, [order_id]);
+
+            const orderItems = orderItemsRes.rows.map((item) => {
+                return {
+                    quantity: item.quantity,
+                    name: item.name,
+                    price: item.price * item.quantity,
+                    isHeroImage: item.is_hero,
+                    image_url: item.image_url
+                }
+            });
+            return { orderAddress, orderItems };
+        } catch (err) {
+            console.error('Error while retrieving the order items', err);
+            throw err;
+        }
+    }
+
+    async deleteOrder(orderId: string) {
+        const client = await this.pool.dbPool().connect();
+        try {
+            await client.query('BEGIN');
+            await client.query(`DELETE FROM public.order_items WHERE order_id=$1;`, [orderId]);
+            const orderRes = await client.query(`DELETE FROM public.orders WHERE order_id=$1;`, [orderId]);
+            if (orderRes.rowCount === 0) {
+                throw new NotFoundException('Order not found');
+            }
+            await client.query('COMMIT');
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw new Error(`Failed to delete order: ${err.message}`);
+        } finally {
+            client.release();
+        }
     }
 }

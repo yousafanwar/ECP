@@ -5,3 +5,20 @@ export interface OrderItems {
     quantity: number;
     price: number;
 }
+
+// orderItems
+export interface OrderAddress {
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    type: string;
+}
+
+export interface OrderItems {
+    quantity: number;
+    name: string;
+    price: number;
+    isHeroImage: boolean;
+    image_url: string;
+}

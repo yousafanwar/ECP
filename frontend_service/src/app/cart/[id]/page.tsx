@@ -6,22 +6,17 @@ import { useDispatch } from "react-redux";
 import { resetCount, removeItem } from "@/app/store/cartSlice";
 import { cartItemsArr } from "@/app/interfaces";
 import { updateCart } from "@/app/helperFunctions";
+import { useParams } from "next/navigation";
 
 const Cart = () => {
 
   const [cartItems, setCartItems] = useState<cartItemsArr[]>([]);
   const [priceTotal, setPriceTotal] = useState<number>(0);
   const [refreshCart, setRefreshCart] = useState<boolean>(false);
-  const [cartId, setCartId] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
-
-  useEffect(() => {
-    if (localStorage.getItem('cartId')) {
-      const storedCartId = localStorage.getItem('cartId');
-      setCartId(storedCartId!);
-    }
-  }, [])
+  const params = useParams();
+  const cartId = params.id as string;
 
   useEffect(() => {
     const getCartItems = async () => {
@@ -105,7 +100,24 @@ const Cart = () => {
 
     setPriceTotal(response.payload.CalCartPrice);
 
+
   };
+
+  const checkOut = async (): Promise<void> => {
+    try {
+      const response = await fetch(`http://localhost:5000/order/90759e0a-654a-4f75-ba11-1a8d31973a39/${cartId}`, { method: 'POST' });
+      const result = await response.json();
+      console.log(result.message);
+      if (!response.ok) {
+        throw new Error('Failed to create order');
+      }
+      const orderId = result.payload;
+
+      router.push(`/order/${orderId}`);
+    } catch (err: any) {
+      throw new Error(err);
+    }
+  }
 
   return (
     <div className={styles.cartContainer}>
@@ -148,7 +160,7 @@ const Cart = () => {
             <span>Total</span>
             <span>${priceTotal + 30}</span>
           </div>
-          <button className={styles.checkoutBtn}>Proceed to Checkout</button>
+          <button className={styles.checkoutBtn} onClick={checkOut}>Proceed to Checkout</button>
           <button onClick={() => { router.push('/') }}>Continue Shopping</button>
         </div>
       </div>
