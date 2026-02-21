@@ -5,12 +5,12 @@ export class createNewUserDTO {
     @IsNotEmpty()
     @IsString()
     @MaxLength(255)
-    first_name: string;
+    firstName: string;
 
     @IsNotEmpty()
     @IsString()
     @MaxLength(255)
-    last_name: string;
+    lastName: string;
 
     @IsNotEmpty()
     @IsEmail()

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
-import { FetchUser } from './interface';
+import { FetchUserById, FetchUserByEmail } from './interface';
 import { createNewUserDTO, createNewAddressDTO, updateAddressDTO } from './dto';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class UsersService {
 
     constructor(private readonly pool: DbService) { }
 
-    async getAllUsers(): Promise<FetchUser[]> {
+    async getAllUsers(): Promise<FetchUserById[]> {
         let response = await this.pool.dbPool().query('select * from users');
         if (response.rows.length === 0) {
             throw new NotFoundException("No users found");
@@ -16,7 +16,7 @@ export class UsersService {
         return response.rows;
     };
 
-    async getUserById(userId: string): Promise<FetchUser> {
+    async getUserById(userId: string): Promise<FetchUserById> {
         let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, email, is_deleted, created_at, updated_at FROM public.users where user_id = $1;', [userId]);
         if (response.rows.length === 0) {
             throw new NotFoundException(`No user found with the id: ${userId}`);
@@ -24,9 +24,17 @@ export class UsersService {
         return response.rows[0];
     }
 
-    async addUser(userData: createNewUserDTO) {
+    async getUserByEmail(email: string): Promise<FetchUserByEmail> {
+        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, "password", is_deleted, created_at, updated_at FROM public.users where email=$1;', [email]);
+        if (response.rows.length === 0) {
+            throw new NotFoundException(`No user found with the email: ${email}`);
+        }
+        return response.rows[0];
+    }
+
+    async createUser(userData: createNewUserDTO) {
         try {
-            let response = await this.pool.dbPool().query(`INSERT INTO public.users (first_name, last_name, email, "password") VALUES($1, $2, $3, $4) returning user_id, first_name, last_name, email;`, [userData.first_name, userData.last_name, userData.email, userData.password]);
+            let response = await this.pool.dbPool().query(`INSERT INTO public.users (first_name, last_name, email, "password") VALUES($1, $2, $3, $4) returning user_id, first_name, last_name, email;`, [userData.firstName, userData.lastName, userData.email, userData.password]);
             console.log('create user response', response);
             return response.rows[0].user_id;
         } catch (err) {

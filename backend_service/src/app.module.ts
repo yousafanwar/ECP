@@ -9,9 +9,11 @@ import { cartModule } from './cart/cart.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BrandsModule } from './brands/brands.module';
 import { OrdersModule } from './orders/orders.module';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [UsersModule, DbModule, ProductsModule, cartModule, CategoriesModule, BrandsModule, OrdersModule, ConfigModule.forRoot({ isGlobal: true })],
+  imports: [UsersModule, DbModule, ProductsModule, cartModule, CategoriesModule, BrandsModule, OrdersModule, JwtModule, AuthModule, ConfigModule.forRoot({ isGlobal: true })],
   controllers: [AppController],
   providers: [AppService],
 })
