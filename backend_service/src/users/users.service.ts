@@ -36,7 +36,11 @@ export class UsersService {
         try {
             let response = await this.pool.dbPool().query(`INSERT INTO public.users (first_name, last_name, email, "password") VALUES($1, $2, $3, $4) returning user_id, first_name, last_name, email;`, [userData.firstName, userData.lastName, userData.email, userData.password]);
             console.log('create user response', response);
-            return response.rows[0].user_id;
+            return {
+                message: 'User created successfully',
+                userId: response.rows[0].user_id,
+                user: response.rows[0],
+            };
         } catch (err) {
             if (err.code === '23505') {
                 throw new ConflictException('Email already exists');
