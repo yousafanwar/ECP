@@ -22,6 +22,8 @@ interface FormDataType {
 const admin_panel = () => {
 
   const [showAddItemFields, setShowAddItemFields] = useState<boolean>(false);
+  const [showAddCategoryFields, setShowAddCategoryFields] = useState<boolean>(false);
+  const [showAddBrandFields, setShowAddBrandFields] = useState<boolean>(false);
   const [imageThumbnail, setImageThumbnail] = useState<string>("");
   const [categories, setCategories] = useState<Array<{ category_id: string, name: string }>>([]);
   const [brands, setBrands] = useState<Array<{ brand_id: number, name: string, description: string }>>([]);
@@ -38,6 +40,8 @@ const admin_panel = () => {
     fileUpload: "",
     imagePublicId: ""
   });
+  const [categoryFormData, setCategoryFormData] = useState<{ name: string, description: string }>({ name: "", description: "" });
+  const [brandFormData, setBrandFormData] = useState<{ name: string, description: string }>({ name: "", description: "" });
 
   const handleFileUpload = (e: any) => {
     const publicId = e.info.public_id;
@@ -109,7 +113,7 @@ const admin_panel = () => {
       const response = await fetch('http://localhost:5000/categories');
       const result = await response.json();
       setLoading((prev) => ({ ...prev, category: false }));
-      setCategories(result);
+      setCategories(result.payload);
     } catch (err) {
       console.error(err);
     };
@@ -121,12 +125,75 @@ const admin_panel = () => {
       const response = await fetch('http://localhost:5000/brands');
       const result = await response.json();
       setLoading((prev) => ({ ...prev, brand: false }));
-      console.log('Brands fetched:', result);
-      setBrands(result);
+      setBrands(result.payload);
     } catch (err) {
       console.error(err);
     };
   }
+
+  const handleCategorySubmit = async (e: any) => {
+    e.preventDefault();
+    const obj = {
+      name: categoryFormData.name,
+      description: categoryFormData.description
+    };
+
+    try {
+      setLoading((prev) => ({ ...prev, fullPage: true }));
+      const response = await fetch(`http://localhost:5000/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(obj)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        alert(`Error while adding category: ${result.message}`);
+        throw new Error('request failed');
+      } else {
+        setLoading((prev) => ({ ...prev, fullPage: false }));
+        setCategoryFormData({ name: "", description: "" });
+        setShowAddCategoryFields(false);
+        alert(result.message);
+      }
+    } catch (err) {
+      console.log("An error has occured", err);
+      setLoading((prev) => ({ ...prev, fullPage: false }));
+    }
+  };
+
+  const handleBrandSubmit = async (e: any) => {
+    e.preventDefault();
+    const obj = {
+      name: brandFormData.name,
+      description: brandFormData.description
+    };
+
+    try {
+      setLoading((prev) => ({ ...prev, fullPage: true }));
+      const response = await fetch(`http://localhost:5000/brands`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(obj)
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        alert(`Error while adding brand: ${result.message}`);
+        throw new Error('request failed');
+      } else {
+        setLoading((prev) => ({ ...prev, fullPage: false }));
+        setBrandFormData({ name: "", description: "" });
+        setShowAddBrandFields(false);
+        alert(result.message);
+      }
+    } catch (err) {
+      console.log("An error has occured", err);
+      setLoading((prev) => ({ ...prev, fullPage: false }));
+    }
+  };
 
   return (
     <>
@@ -134,6 +201,8 @@ const admin_panel = () => {
       <h1 className={styles.header}>Admin panel</h1>
       <h1 className={styles.header}>Welcome to the control room, Mr. President!</h1>
       <button className={styles.addBtn} onClick={() => setShowAddItemFields(true)}>Add new item</button>
+      <button className={styles.addBtn} onClick={() => setShowAddCategoryFields(true)}>Add new category</button>
+      <button className={styles.addBtn} onClick={() => setShowAddBrandFields(true)}>Add new brand</button>
       {showAddItemFields && <>
         <form onSubmit={handleSubmit}>
           <div className={styles.centerDiv}>
@@ -326,6 +395,102 @@ const admin_panel = () => {
                         <p className="text-xs/5 text-gray-400">PNG, JPG, GIF up to 10MB</p>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="submit" className={styles.addBtn}>Submit</button>
+        </form>
+      </>}
+
+      {showAddCategoryFields && <>
+        <form onSubmit={handleCategorySubmit}>
+          <div className={styles.centerDiv}>
+            <div className="space-y-12">
+              <div className="border-b border-white/10 pb-12">
+                <h2 className="text-base/7 font-semibold text-white">Add new category</h2>
+                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div className="sm:col-span-4">
+                    <label htmlFor="categoryName" className="block text-sm/6 font-medium text-white">
+                      Category name
+                    </label>
+                    <div className="mt-2">
+                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
+                        <input
+                          name="categoryName"
+                          type="text"
+                          placeholder="Electronics"
+                          value={categoryFormData.name}
+                          onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
+                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-full">
+                    <label htmlFor="categoryDescription" className="block text-sm/6 font-medium text-white">
+                      Description
+                    </label>
+                    <div className="mt-2">
+                      <textarea
+                        name="categoryDescription"
+                        rows={3}
+                        value={categoryFormData.description}
+                        onChange={(e) => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
+                        className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                      />
+                    </div>
+                    <p className="mt-3 text-sm/6 text-gray-400">Write a brief description of the category.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button type="submit" className={styles.addBtn}>Submit</button>
+        </form>
+      </>}
+
+      {showAddBrandFields && <>
+        <form onSubmit={handleBrandSubmit}>
+          <div className={styles.centerDiv}>
+            <div className="space-y-12">
+              <div className="border-b border-white/10 pb-12">
+                <h2 className="text-base/7 font-semibold text-white">Add new brand</h2>
+                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                  <div className="sm:col-span-4">
+                    <label htmlFor="brandName" className="block text-sm/6 font-medium text-white">
+                      Brand name
+                    </label>
+                    <div className="mt-2">
+                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
+                        <input
+                          name="brandName"
+                          type="text"
+                          placeholder="Apple"
+                          value={brandFormData.name}
+                          onChange={(e) => setBrandFormData({ ...brandFormData, name: e.target.value })}
+                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="col-span-full">
+                    <label htmlFor="brandDescription" className="block text-sm/6 font-medium text-white">
+                      Description
+                    </label>
+                    <div className="mt-2">
+                      <textarea
+                        name="brandDescription"
+                        rows={3}
+                        value={brandFormData.description}
+                        onChange={(e) => setBrandFormData({ ...brandFormData, description: e.target.value })}
+                        className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
+                      />
+                    </div>
+                    <p className="mt-3 text-sm/6 text-gray-400">Write a brief description of the brand.</p>
                   </div>
                 </div>
               </div>

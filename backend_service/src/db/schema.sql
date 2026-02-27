@@ -58,7 +58,8 @@ create table if not exists product_images (
 -- categories table
 create table if not exists categories( 
 	category_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT Null, 
-	name VARCHAR(255) not null 
+	name VARCHAR(255) not null,
+	description TEXT
 );
 
 -- brands table
