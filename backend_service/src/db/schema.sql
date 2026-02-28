@@ -10,6 +10,18 @@ create table if not exists users(
 	updated_at timestamp default CURRENT_TIMESTAMP 
 );
 
+-- refresh tokens table
+create table if not exists refresh_tokens(
+	token_id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT null,
+	user_id UUID not null,
+	token_hash VARCHAR(255) not null,
+	expires_at timestamp not null,
+	is_revoked boolean default false,
+	created_at timestamp default CURRENT_TIMESTAMP,
+	updated_at timestamp default CURRENT_TIMESTAMP,
+	foreign key (user_id) references users(user_id)
+);
+
 -- enum address type
 create type addressType as enum ('billing', 'shipping', 'both'); 
 

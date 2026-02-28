@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException } from '@nestjs/common
 import { DbService } from 'src/db/db.service';
 import { FetchUserById, FetchUserByEmail } from './interface';
 import { createNewUserDTO, createNewAddressDTO, updateAddressDTO } from './dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -70,5 +71,41 @@ export class UsersService {
             throw new NotFoundException("No address found for the user")
         }
         return result;
+    }
+
+    async storeRefreshToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {
+        await this.pool.dbPool().query(
+            `INSERT INTO public.refresh_tokens (user_id, token_hash, expires_at) VALUES($1, $2, $3)`,
+            [userId, tokenHash, expiresAt],
+        );
+    }
+
+    async validateRefreshToken(userId: string, tokenHash: string): Promise<boolean> {
+        const response = await this.pool.dbPool().query(
+            `SELECT token_hash FROM public.refresh_tokens WHERE user_id=$1 AND is_revoked=false AND expires_at > NOW()`,
+            [userId],
+        );
+        
+        if (response.rows.length === 0) {
+            return false;
+        }
+
+        // Compare the incoming token with the stored hash using bcryptjs
+        const storedHash = response.rows[0].token_hash;
+        return await bcrypt.compare(tokenHash, storedHash);
+    }
+
+    async revokeRefreshToken(userId: string): Promise<void> {
+        await this.pool.dbPool().query(
+            `UPDATE public.refresh_tokens SET is_revoked=true, updated_at=CURRENT_TIMESTAMP WHERE user_id=$1`,
+            [userId],
+        );
+    }
+
+    async revokeAllTokens(userId: string): Promise<void> {
+        await this.pool.dbPool().query(
+            `UPDATE public.refresh_tokens SET is_revoked=true, updated_at=CURRENT_TIMESTAMP WHERE user_id=$1`,
+            [userId],
+        );
     }
 }
