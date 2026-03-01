@@ -17,19 +17,21 @@ export class AuthService {
 
     async login(email: string, password: string) {
         const user = await this.usersService.getUserByEmail(email);
-        if (!user) throw new UnauthorizedException('Invalid credentials');
+        if (!user) throw new UnauthorizedException('Invalid email');
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+        if (!isMatch) throw new UnauthorizedException('Invalid password');
 
         const payload = { sub: user.user_id, email: email, name: user.first_name };
-        const accessToken = this.jwtService.sign(payload);
+        const accessToken = this.jwtService.sign(payload, {
+            expiresIn: '15m',
+        });
 
         // Generate refresh token
         const refreshToken = this.generateRefreshToken();
         const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
         const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 30); // 30 days
+        expiresAt.setDate(expiresAt.getDate() + 7); // 7 days
 
         // Store hashed refresh token in database
         await this.usersService.storeRefreshToken(user.user_id, refreshTokenHash, expiresAt);
@@ -53,7 +55,9 @@ export class AuthService {
 
         const user = await this.usersService.getUserById(userId);
         const payload = { sub: user.user_id, email: user.email, name: user.first_name };
-        const accessToken = this.jwtService.sign(payload);
+        const accessToken = this.jwtService.sign(payload, {
+            expiresIn: '15m', // 15 minutes
+        });
 
         return {
             access_token: accessToken,

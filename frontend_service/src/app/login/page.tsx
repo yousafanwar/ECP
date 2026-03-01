@@ -4,9 +4,12 @@ import Link from "next/link";
 import AuthInput from "@/app/components/AuthInput";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setAuth } from "@/app/store/authSlice";
 import { validateLoginForm } from "@/lib/validations/authValidation";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 import { SUCCESS_MESSAGES } from "@/lib/constants/successMessages";
+import { apiPublic } from "@/lib/api";
 
 export default function LoginPage() {
 
@@ -16,6 +19,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
     const router = useRouter();
+    const dispatch = useDispatch();
 
     const handleLogin = async () => {
         // Validate form
@@ -34,18 +38,38 @@ export default function LoginPage() {
         setSuccess("");
 
         try {
-            const response = await fetch('http://localhost:5000/auth/login', {
+            const response = await apiPublic('/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            })
+                body: JSON.stringify({ email, password }),
+            });
+            
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || ERROR_MESSAGES.LOGIN_FAILED);
             }
+            
             const result = await response.json();
+            
+            // Dispatch to Redux store
+            dispatch(setAuth({
+                user: {
+                    userId: result.userId,
+                    firstName: result.firstName,
+                    lastName: result.lastName,
+                    email: email,
+                },
+                accessToken: result.access_token,
+                // refreshToken is stored in httpOnly cookie automatically
+            }));
+
+            // Also store in localStorage for persistence (only access token)
+            localStorage.setItem('accessToken', result.access_token);
+            localStorage.setItem('userId', result.userId);
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('firstName', result.firstName);
+            localStorage.setItem('lastName', result.lastName);
+
             setSuccess(SUCCESS_MESSAGES.LOGIN_SUCCESS);
-            localStorage.setItem('bearerToken', result.access_token);
 
             setTimeout(() => {
                 router.push('/');

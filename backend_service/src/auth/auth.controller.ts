@@ -1,4 +1,6 @@
-import { Controller, Post, Body, Get, UseGuards, Request, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request, BadRequestException, Res, Req } from '@nestjs/common';
+import type { Response } from 'express';
+import type { Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -13,24 +15,66 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body.email, body.password);
+  async login(
+    @Body() body: { email: string; password: string },
+    @Res() res: Response
+  ) {
+    const result = await this.authService.login(body.email, body.password);
+
+    // Set refresh token as httpOnly cookie
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/auth', // Only send to /auth routes
+    });
+
+    // Return only accessToken and user info (not refresh_token)
+    return res.json({
+      userId: result.userId,
+      firstName: result.firstName,
+      lastName: result.lastName,
+      email: body.email,
+      access_token: result.access_token,
+    });
   }
 
   @Post('refresh')
-  refresh(@Body() body: { userId: string; refresh_token: string }) {
-    if (!body.userId || !body.refresh_token) {
-      throw new BadRequestException('Missing userId or refresh_token');
+  async refresh(
+    @Req() req: ExpressRequest,
+    @Body() body: { userId: string },
+    @Res() res: Response
+  ) {
+    const userId = body.userId;
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken || !userId) {
+      throw new BadRequestException('Missing userId or refresh token cookie');
     }
-    return this.authService.refresh(body.userId, body.refresh_token);
+
+    const result = await this.authService.refresh(userId, refreshToken);
+
+    // Optionally set a new refresh token (token rotation)
+    // For now, we'll just return the new access token
+    
+    return res.json({
+      access_token: result.access_token,
+    });
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Request() req: any) {
-    // In this simple implementation, logout is handled by the client
-    // by deleting the refresh token and clearing tokens from storage
-    // For now, we can just return a success message
-    return { message: 'Logged out successfully' };
+  logout(@Res() res: Response) {
+    // Clear the refresh token cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/auth',
+    });
+
+    return res.json({ message: 'Logged out successfully' });
   }
 }
+

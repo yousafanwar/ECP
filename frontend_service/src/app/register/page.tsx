@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { validateRegisterForm } from "@/lib/validations/authValidation";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 import { SUCCESS_MESSAGES } from "@/lib/constants/successMessages";
+import { apiPublic } from "@/lib/api";
 
 export default function RegisterPage() {
     const [firstName, setFirstName] = useState<string>("");
@@ -39,9 +40,8 @@ export default function RegisterPage() {
         setSuccess("");
 
         try {
-            const response = await fetch("http://localhost:5000/auth/register", {
+            const response = await apiPublic("/auth/register", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     firstName,
                     lastName,

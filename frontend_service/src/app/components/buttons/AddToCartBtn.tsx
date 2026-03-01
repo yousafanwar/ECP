@@ -2,6 +2,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addItem, updateCount } from '@/app/store/cartSlice';
 import { restoreCartCount } from '@/app/helperFunctions';
+import { apiPost } from "@/lib/api";
+import { RootState } from "@/app/store/store";
+import { useRouter } from "next/navigation";
 
 interface AddToCartProps {
     product_id: string;
@@ -12,7 +15,10 @@ interface AddToCartProps {
 const AddToCartBtn = (props: AddToCartProps) => {
 
     const dispatch = useDispatch();
+    const router = useRouter();
     const selector = useSelector((state: any) => state.cartStore.items);
+    const userId = useSelector((state: RootState) => state.auth.user?.userId);
+    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
     const getCartCount = async (cartId: string) => {
         const cartCount = await restoreCartCount(cartId);
@@ -20,32 +26,35 @@ const AddToCartBtn = (props: AddToCartProps) => {
     }
 
     const addItemToCart = async () => {
+        // Check if user is authenticated
+        if (!isAuthenticated || !userId) {
+            alert("Please login to add items to cart");
+            router.push('/login');
+            return;
+        }
+
         if (!selector.includes(props.product_id)) {
             dispatch(addItem(props.product_id));
         };
-        const obj = {
-            user_id: "90759e0a-654a-4f75-ba11-1a8d31973a39",
-            product_id: props.product_id,
-            quantity: props.qty
-        };
+        
         try {
-            const response = await fetch(`http://localhost:5000/cart`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(obj)
-            })
+            const response = await apiPost('/cart', {
+                user_id: userId,
+                product_id: props.product_id,
+                quantity: props.qty
+            });
+            
             const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error("Could not update the cart");
+            }
+            
             getCartCount(result.payload.cartId);
             if (result?.payload?.cartId) {
                 localStorage.setItem('cartId', result.payload.cartId);
             }
-            if (!response.ok) {
-                throw new Error("Could not update the cart");
-            } else {
-                alert(result.message);
-            }
+            alert(result.message);
         } catch (err) {
             console.error("Error while updating the cart", err);
         }
