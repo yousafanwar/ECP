@@ -7,22 +7,26 @@ import { resetCount, removeItem } from "@/app/store/cartSlice";
 import { cartItemsArr } from "@/app/interfaces";
 import { updateCart } from "@/app/helperFunctions";
 import { useParams } from "next/navigation";
+import { apiGet, apiDelete, apiPost } from "@/lib/api";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 const Cart = () => {
 
   const [cartItems, setCartItems] = useState<cartItemsArr[]>([]);
   const [priceTotal, setPriceTotal] = useState<number>(0);
   const [refreshCart, setRefreshCart] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
   const params = useParams();
   const cartId = params.id as string;
+  const { user } = useAuth();
 
   useEffect(() => {
     const getCartItems = async () => {
       if (!cartId) return;
       try {
-        const response = await fetch(`http://localhost:5000/cart/${cartId}`);
+        const response = await apiGet(`/cart/${cartId}`);
         const result = await response.json();
         const totalPrice = result.payload.reduce(
           (acc: number, item: cartItemsArr) =>
@@ -40,12 +44,7 @@ const Cart = () => {
 
   const removeCartItem = async (cartItem: any) => {
     try {
-      const response = await fetch(`http://localhost:5000/cart/delete_item/${cartItem.cart_item_id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
+      const response = await apiDelete(`/cart/delete_item/${cartItem.cart_item_id}`);
       const result = await response.json();
       result.success && alert('Item removed from cart');
       if (!response.ok) {
@@ -67,12 +66,7 @@ const Cart = () => {
 
   const removeCart = async (cartId: string | null) => {
     try {
-      const response = await fetch(`http://localhost:5000/cart/delete_cart/${cartId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
+      const response = await apiDelete(`/cart/delete_cart/${cartId}`);
       if (!response.ok) {
         throw new Error("Could not delete the cart");
       } else {
@@ -105,23 +99,50 @@ const Cart = () => {
 
   const checkOut = async (): Promise<void> => {
     try {
-      const response = await fetch(`http://localhost:5000/order/90759e0a-654a-4f75-ba11-1a8d31973a39/${cartId}`, { method: 'POST' });
-      const result = await response.json();
-      console.log(result.message);
-      if (!response.ok) {
-        throw new Error('Failed to create order');
+      setError(null); // Clear previous errors
+      
+      if (!user?.userId || !cartId) {
+        console.error('User ID or Cart ID not available');
+        return;
       }
-      const orderId = result.payload;
 
+      const response = await apiPost(`/order/${user.userId}/${cartId}`, {});
+      const result = await response.json();
+      
+      if (!response.ok) {
+        // Handle specific error messages from backend
+        const errorMessage = result.message || 'Failed to create order';
+        setError(errorMessage);
+        console.error(errorMessage);
+        return;
+      }
+      
+      const orderId = result.payload;
       router.push(`/order/${orderId}`);
     } catch (err: any) {
-      throw new Error(err);
+      const errorMessage = err.message || 'An error occurred while processing your order';
+      setError(errorMessage);
+      console.error(errorMessage);
     }
   }
 
   return (
     <div className={styles.cartContainer}>
       <h1 className={styles.cartTitle}>Your Shopping Cart</h1>
+
+      {error && (
+        <div style={{
+          backgroundColor: '#fee2e2',
+          borderLeft: '4px solid #dc2626',
+          color: '#991b1b',
+          padding: '1rem',
+          marginBottom: '1rem',
+          borderRadius: '0.375rem',
+          fontSize: '0.95rem'
+        }}>
+          <strong>Order Error:</strong> {error}
+        </div>
+      )}
 
       <div className={styles.cartContent}>
         <div className={styles.cartItems}>

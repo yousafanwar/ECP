@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
+import { apiGet, apiPut, apiDelete } from "@/lib/api";
+import { useAuth } from "@/lib/hooks/useAuth";
 
 interface CartItem {
   name: string;
@@ -16,7 +18,6 @@ interface Address {
   city: string;
   state: string;
   country: string;
-  zipCode: string;
   type?: string;
 }
 
@@ -27,23 +28,24 @@ const Order = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [savedAddress, setSavedAddress] = useState<Address | null>(null);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
   const [newAddress, setNewAddress] = useState<Address>({
     street: "",
     city: "",
     state: "",
     country: "",
-    zipCode: "",
     type: "both",
   })
   const router = useRouter();
   const params = useParams();
   const orderId = params.id;
+  const { user } = useAuth();
 
   useEffect(() => {
     const getOrderById = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/order/${orderId}`);
+        const response = await apiGet(`/order/${orderId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch the order');
         }
@@ -63,33 +65,44 @@ const Order = () => {
 
   const updateAddress = async () => {
     try {
+      if (!user?.userId) {
+        console.error('User ID not available');
+        return;
+      }
 
-      const response = await fetch(`http://localhost:5000/users/updateAddress/90759e0a-654a-4f75-ba11-1a8d31973a39`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          street: newAddress.street,
-          city: newAddress.city,
-          state: newAddress.state,
-          country: newAddress.country,
-          type: newAddress.type,
-        }),
-      })
-      const result = await response.json();
-      setSavedAddress({
-        street: result.payload.street,
-        city: result.payload.city,
-        state: result.payload.state,
-        country: result.payload.country,
-        zipCode: result.payload.zipCode,
-        type: result.payload.type,
+      setIsSavingAddress(true);
+
+      const response = await apiPut(`/users/updateAddress/${user.userId}`, {
+        street: newAddress.street,
+        city: newAddress.city,
+        state: newAddress.state,
+        country: newAddress.country,
+        type: newAddress.type,
       });
-      alert(result.message);
-      setIsEditingAddress(false);
+
+      if (!response.ok) {
+        throw new Error('Failed to save address');
+      }
+
+      const result = await response.json();
+      
+      if (result?.payload) {
+        setSavedAddress({
+          street: result.payload.street,
+          city: result.payload.city,
+          state: result.payload.state,
+          country: result.payload.country,
+          type: result.payload.type,
+        });
+        alert(savedAddress ? 'Address updated successfully!' : 'Address added successfully!');
+        setIsEditingAddress(false);
+        setNewAddress({} as Address);
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Error saving address:', err);
+      alert('Failed to save address. Please try again.');
+    } finally {
+      setIsSavingAddress(false);
     }
   };
 
@@ -100,9 +113,7 @@ const Order = () => {
       return;
     } else {
       try {
-        const response = await fetch(`http://localhost:5000/order/${orderId}`, {
-          method: 'DELETE'
-        })
+        const response = await apiDelete(`/order/${orderId}`);
         if (!response.ok) {
           throw new Error('Failed to delete order');
         }
@@ -126,6 +137,19 @@ const Order = () => {
                 <h2 className="text-2xl font-semibold">Address</h2>
               </div>
 
+              {!savedAddress && !isEditingAddress && (
+                <div style={{
+                  backgroundColor: '#fef3c7',
+                  borderLeft: '4px solid #f59e0b',
+                  color: '#92400e',
+                  padding: '1rem',
+                  marginBottom: '1rem',
+                  borderRadius: '0.375rem'
+                }}>
+                  <strong>⚠️ Attention:</strong> You must add a shipping or billing address to complete your order.
+                </div>
+              )}
+
               {savedAddress && !isEditingAddress ? (
                 <div className="space-y-4">
                   <div>
@@ -137,7 +161,6 @@ const Order = () => {
                   </div>
                   <div className="space-y-2">
                     <p className="text-gray-700 font-medium">{savedAddress.street}</p>
-                    <p className="text-gray-700">{savedAddress.city}, {savedAddress.state} {savedAddress.zipCode}</p>
                     <p className="text-gray-700">{savedAddress.country}</p>
                   </div>
                   <button
@@ -202,17 +225,6 @@ const Order = () => {
                         placeholder="Pakistan"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium mb-2">Zip Code *</label>
-                      <input
-                        type="text"
-                        name="zipCode"
-                        value={newAddress.zipCode}
-                        onChange={(e) => setNewAddress((prev) => ({ ...prev, zipCode: e.target.value }))}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
-                        placeholder="54000"
-                      />
-                    </div>
 
                   </div>
                   <div>
@@ -264,9 +276,10 @@ const Order = () => {
 
                   <button
                     onClick={updateAddress}
-                    className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors"
+                    disabled={isSavingAddress}
+                    className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    Update address
+                    {isSavingAddress ? 'Saving...' : savedAddress ? 'Update address' : 'Add address'}
                   </button>
                 </div>
               )}
@@ -371,10 +384,10 @@ const Order = () => {
 
               <button
                 // onClick={handlePlaceOrder}
-                disabled={isLoading}
+                disabled={isLoading || !savedAddress}
                 className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {isLoading ? 'Processing...' : 'Proceed to Pay'}
+                {!savedAddress ? 'Add Address First' : isLoading ? 'Processing...' : 'Proceed to Pay'}
               </button>
 
               <button

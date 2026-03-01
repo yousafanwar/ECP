@@ -4,6 +4,7 @@ import { ProductData } from "@/app/interfaces";
 import styles from "../product.module.css";
 import AddToCartBtn from "@/app/components/buttons/AddToCartBtn";
 import { useRouter } from "next/navigation";
+import { apiGet } from "@/lib/api";
 
 const ProductPage = ({ params }: { params: { id: string } }) => {
 
@@ -18,7 +19,7 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
 
     const fetchProduct = async () => {
       const { id } = await params;
-      const response = await fetch(`http://localhost:5000/product/${id}`);
+      const response = await apiGet(`/product/${id}`);
       const data = await response.json();
       if (data.payload.stock_quantity <= 3) {
         setLowQty(true)
@@ -39,7 +40,7 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
 
   const getStockQty = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/cart/check-stock/${productId}`);
+      const response = await apiGet(`/cart/check-stock/${productId}`);
       const result = await response.json();
       if (!response.ok) {
         throw new Error('Failed to get stock quantity');

@@ -2,34 +2,48 @@
 import { ShoppingCartIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { useAuth } from "@/lib/hooks/useAuth";
+import { apiGet } from "@/lib/api";
 
 const GoToCartBtn = () => {
-
     const [cartId, setCartId] = useState<string>("");
     const [cartCount, setCartCount] = useState<number>(0);
     const router = useRouter();
-    // const [cartExists, setCartExists] = useState<boolean>(false);
     const selector = useSelector((state: any) => state.cartStore.count);
-    const dispatch = useDispatch();
+    const { user } = useAuth();
 
     useEffect(() => {
         const getCart = async () => {
-                let cartResponse = await fetch(`http://localhost:5000/cart/user/90759e0a-654a-4f75-ba11-1a8d31973a39`);
-                let result = await cartResponse.json();
-                if (!result.ok) {
-                    return;
-                } else {
-                    setCartId(result?.payload?.cart_id);
+            // Only fetch if user is available
+            if (!user?.userId) {
+                console.log('Waiting for user to load...');
+                return;
+            }
+
+            try {
+                const result = await apiGet(`/cart/user/${user.userId}`);
+                if (result?.ok) {
+                    const data = await result.json();
+                    if (data?.payload?.cart_id) {
+                        setCartId(data.payload.cart_id);
+                        localStorage.setItem('cartId', data.payload.cart_id);
+                    }
                 }
+            } catch (error) {
+                console.error('Error fetching cart:', error);
+            }
         };
 
-        if (localStorage.getItem('cartId')) {
-            setCartId(localStorage.getItem('cartId')!);
-        } else {
+        // Check localStorage first
+        const cartFromStorage = localStorage.getItem('cartId');
+        if (cartFromStorage) {
+            setCartId(cartFromStorage);
+        } else if (user?.userId) {
+            // Only fetch if user is available
             getCart();
         }
-    }, []);
+    }, [user?.userId]); // Re-run when userId changes
 
     useEffect(() => {
         const getStoreCount = async () => {

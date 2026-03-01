@@ -63,14 +63,41 @@ export class UsersService {
         return result;
     }
 
-    async updateAddress(userId: string, data: updateAddressDTO) {
+    async updateUserAddress(userId: string, data: updateAddressDTO) {
         await this.getUserById(userId);
-        const response = await this.pool.dbPool().query(`UPDATE public.address SET street=$1, city=$2, state=$3, country=$4, "type"=$5 WHERE user_id=$6 Returning *;`, [data.street, data.city, data.state, data.country, data.type, userId]);
-        const result = response.rows[0];
-        if (response.rows.length === 0) {
-            throw new NotFoundException("No address found for the user")
+        
+        // Check if address exists for this user
+        const findAddress = await this.pool.dbPool().query(
+            'SELECT address_id FROM public.address WHERE user_id = $1;',
+            [userId]
+        );
+
+        if (findAddress.rows.length === 0) {
+            // No address exists >>> INSERT
+            const response = await this.pool.dbPool().query(
+                `INSERT INTO public.address (user_id, street, city, state, country, "type") 
+                 VALUES($1, $2, $3, $4, $5, $6) 
+                 RETURNING *;`,
+                [userId, data.street, data.city, data.state, data.country, data.type]
+            );
+            console.log('Address created:', response.rows[0]);
+            return response.rows[0];
+        } else {
+            // Address exists >>> UPDATE
+            const response = await this.pool.dbPool().query(
+                `UPDATE public.address 
+                 SET street=$1, city=$2, state=$3, country=$4, "type"=$5, updated_at=CURRENT_TIMESTAMP 
+                 WHERE user_id=$6 
+                 RETURNING *;`,
+                [data.street, data.city, data.state, data.country, data.type, userId]
+            );
+            console.log('Address updated:', response.rows[0]);
+            
+            if (response.rows.length === 0) {
+                throw new NotFoundException("Failed to update address");
+            }
+            return response.rows[0];
         }
-        return result;
     }
 
     async storeRefreshToken(userId: string, tokenHash: string, expiresAt: Date): Promise<void> {

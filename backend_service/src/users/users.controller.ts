@@ -45,7 +45,7 @@ export class UsersController {
     @UseGuards(JwtAuthGuard)
     @Put('updateAddress/:userId')
     async updateAddress(@Param('userId', ParseUUIDPipe) userId: string, @Body() data: updateAddressDTO): Promise<ApiResponse> {
-        const response = await this.userService.updateAddress(userId, data);
+        const response = await this.userService.updateUserAddress(userId, data);
         return new ApiResponse(true, 'Address updated successfuly', response);
     }
 

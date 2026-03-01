@@ -48,7 +48,10 @@ export class OrdersService {
     FROM public.address where user_id = $1 
     and type in ('both', 'shipping');`, [user_id]);
 
-            const address_id = addressRes.rows[0].address_id;
+            const address_id = addressRes.rows && addressRes.rows.length > 0 
+                ? addressRes.rows[0].address_id 
+                : null;
+            
 
             await client.query(
                 `UPDATE products

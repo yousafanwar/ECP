@@ -6,6 +6,7 @@ import { CldUploadButton } from 'next-cloudinary';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { Spinner, FullPageSpinner } from "../components/LoadingSpinners";
+import { apiPost, apiGet } from "@/lib/api";
 
 type UUID = string;
 interface FormDataType {
@@ -74,13 +75,7 @@ const admin_panel = () => {
 
     try {
       setLoading((prev) => ({ ...prev, fullPage: true }));
-      const response = await fetch(`http://localhost:5000/product`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(obj)
-      });
+      const response = await apiPost(`/product`, obj);
       const result = await response.json();
       if (!response.ok) {
         alert(`Error while adding product: ${result.message}`);
@@ -110,7 +105,7 @@ const admin_panel = () => {
   const fetchCategories = async () => {
     try {
       setLoading((prev) => ({ ...prev, category: true }));
-      const response = await fetch('http://localhost:5000/categories');
+      const response = await apiGet('/categories');
       const result = await response.json();
       setLoading((prev) => ({ ...prev, category: false }));
       setCategories(result.payload);
@@ -122,7 +117,7 @@ const admin_panel = () => {
   const fetchBrands = async () => {
     try {
       setLoading((prev) => ({ ...prev, brand: true }));
-      const response = await fetch('http://localhost:5000/brands');
+      const response = await apiGet('/brands');
       const result = await response.json();
       setLoading((prev) => ({ ...prev, brand: false }));
       setBrands(result.payload);
@@ -140,13 +135,7 @@ const admin_panel = () => {
 
     try {
       setLoading((prev) => ({ ...prev, fullPage: true }));
-      const response = await fetch(`http://localhost:5000/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(obj)
-      });
+      const response = await apiPost(`/categories`, obj);
       const result = await response.json();
       if (!response.ok) {
         alert(`Error while adding category: ${result.message}`);
@@ -172,13 +161,7 @@ const admin_panel = () => {
 
     try {
       setLoading((prev) => ({ ...prev, fullPage: true }));
-      const response = await fetch(`http://localhost:5000/brands`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(obj)
-      });
+      const response = await apiPost(`/brands`, obj);
       const result = await response.json();
       if (!response.ok) {
         alert(`Error while adding brand: ${result.message}`);

@@ -1,7 +1,8 @@
 import store, { type RootState } from "@/app/store/store";
 import { setAccessToken, clearAuth } from "@/app/store/authSlice";
 
-const API_BASE_URL = "http://localhost:5000";
+// const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "http://192.168.100.58:5000";
 
 interface ApiRequestOptions extends RequestInit {
   skipAuth?: boolean; // Skip adding auth header for public endpoints
@@ -31,6 +32,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
   const userId = getUserId();
 
   if (!userId) {
+    console.error('No userId available for token refresh');
     store.dispatch(clearAuth());
     return null;
   }
@@ -43,12 +45,13 @@ const refreshAccessToken = async (): Promise<string | null> => {
       },
       credentials: "include", // Send cookies with request
       body: JSON.stringify({
-        userId, // Only send userId, refresh token is in cookie
+        userId, 
       }),
     });
 
     if (!response.ok) {
-      throw new Error("Token refresh failed");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Token refresh failed: ${response.status} - ${errorData.message || response.statusText}`);
     }
 
     const data = await response.json();
@@ -65,6 +68,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
     return newAccessToken;
   } catch (error) {
     console.error("Error refreshing token:", error);
+    // Clear auth on any refresh failure
     store.dispatch(clearAuth());
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
@@ -120,9 +124,11 @@ export const apiCall = async (
 
   // Handle 401 (Unauthorized) - try to refresh token
   if (response.status === 401 && !skipAuth && retryCount > 0) {
+    console.log('Received 401, attempting token refresh...');
     const newAccessToken = await refreshAccessToken();
 
     if (newAccessToken) {
+      console.log('Token refreshed successfully, retrying request...');
       // Retry the request with new token
       finalHeaders = {
         ...finalHeaders,
@@ -134,6 +140,8 @@ export const apiCall = async (
         headers: finalHeaders,
         credentials: "include",
       });
+    } else {
+      console.log('Token refresh failed, user will need to login again');
     }
   }
 
