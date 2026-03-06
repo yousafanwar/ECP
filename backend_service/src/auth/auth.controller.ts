@@ -65,7 +65,14 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  logout(@Res() res: Response) {
+  async logout(@Request() req: any, @Res() res: Response) {
+    const userId = req.user.sub; // Extracted from JWT by JwtAuthGuard
+
+    // Revoke all refresh tokens for this user
+    if (userId) {
+      await this.authService.revokeUserTokens(userId);
+    }
+
     // Clear the refresh token cookie
     res.clearCookie('refreshToken', {
       httpOnly: true,

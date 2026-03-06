@@ -68,4 +68,8 @@ export class AuthService {
         const hashed = await bcrypt.hash(password, 10);
         return this.usersService.createUser({ email, password: hashed, firstName, lastName });
     }
+
+    async revokeUserTokens(userId: string): Promise<void> {
+        await this.usersService.revokeAllTokens(userId);
+    }
 }

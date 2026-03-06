@@ -117,9 +117,14 @@ export class UsersService {
             return false;
         }
 
-        // Compare the incoming token with the stored hash using bcryptjs
-        const storedHash = response.rows[0].token_hash;
-        return await bcrypt.compare(tokenHash, storedHash);
+        // Compare the incoming token against all valid stored hashes
+        for (const row of response.rows) {
+            const isValid = await bcrypt.compare(tokenHash, row.token_hash);
+            if (isValid) {
+                return true;
+            }
+        }        
+        return false;
     }
 
     async revokeRefreshToken(userId: string): Promise<void> {
