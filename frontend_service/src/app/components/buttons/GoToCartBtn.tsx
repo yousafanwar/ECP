@@ -2,15 +2,17 @@
 import { ShoppingCartIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useAuth } from "@/lib/hooks/useAuth";
 import { apiGet } from "@/lib/api";
+import { updateCount } from "@/app/store/cartSlice";
 
 const GoToCartBtn = () => {
     const [cartId, setCartId] = useState<string>("");
     const [cartCount, setCartCount] = useState<number>(0);
     const router = useRouter();
     const selector = useSelector((state: any) => state.cartStore.count);
+    const dispatch = useDispatch();
     const { user } = useAuth();
 
     useEffect(() => {
@@ -52,7 +54,17 @@ const GoToCartBtn = () => {
         }
 
         getStoreCount();
-    }, [selector])
+    }, [selector]);
+
+    // Rehydrate Redux from localStorage only when count is 0 on mount (e.g. page refresh)
+    useEffect(() => {
+        if (selector === 0) {
+            const savedCount = localStorage.getItem('cartCount');
+            if (savedCount) {
+                dispatch(updateCount(parseInt(savedCount, 10)));
+            }
+        }
+    }, []);
 
     const navigateToCart = () => {
         const cartIdfromStorage = localStorage.getItem('cartId');

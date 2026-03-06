@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../cart.module.css";
 import { useDispatch } from "react-redux";
-import { resetCount, removeItem } from "@/app/store/cartSlice";
+import { resetCount, removeItem, updateCount } from "@/app/store/cartSlice";
 import { cartItemsArr } from "@/app/interfaces";
 import { updateCart } from "@/app/helperFunctions";
 import { useParams } from "next/navigation";
@@ -30,7 +30,7 @@ const Cart = () => {
         const result = await response.json();
         const totalPrice = result.payload.reduce(
           (acc: number, item: cartItemsArr) =>
-            acc + item.price * item.quantity,
+            acc + item.price, // price from API is already unit_price * quantity
           0
         );
         setCartItems(result.payload);
@@ -79,22 +79,26 @@ const Cart = () => {
   };
 
   const updateCartCount = async (product_id: string, cart_item_id: string, opType: string) => {
-    const response = await updateCart(product_id, cart_item_id, opType, cartId);
+    try {
+      const response = await updateCart(product_id, cart_item_id, opType, cartId);
 
+      setCartItems(prevItems =>
+        prevItems.map(item =>
+          item.cart_item_id === cart_item_id
+            ? {
+                ...item,
+                quantity: response.payload.updatedItemQty,
+                price: (item.price / item.quantity) * response.payload.updatedItemQty
+              }
+            : item
+        )
+      );
 
-    // Update the local cartItems state
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.cart_item_id === cart_item_id
-          ? { ...item, quantity: response.payload.updatedItemQty }
-          : item
-      )
-    );
-    console.log('total price in cart: ', response.payload.CalCartPrice);
-
-    setPriceTotal(response.payload.CalCartPrice);
-
-
+      dispatch(updateCount(response.payload.totalCartQty));
+      setPriceTotal(response.payload.CalCartPrice);
+    } catch (err: any) {
+      console.error('Could not update cart quantity:', err.message ?? err);
+    }
   };
 
   const checkOut = async (): Promise<void> => {
