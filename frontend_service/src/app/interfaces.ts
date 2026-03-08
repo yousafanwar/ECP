@@ -40,3 +40,27 @@ export interface updateCartPayload {
     updatedItemQty: number;
     CalCartPrice: number;
 }
+
+export interface OrderItem {
+  name: string;
+  price: number;
+  quantity: number;
+  image_url: string;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  country: string;
+  type?: string;
+}
+
+export interface OrderSummary {
+  orderId: string;
+  items: OrderItem[];
+  priceTotal: number;
+  shippingCost: number;
+  paymentMethod: string;
+  address: Address;
+}

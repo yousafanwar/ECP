@@ -106,6 +106,10 @@ const Order = () => {
     }
   };
 
+  const handlePlaceOrder = () => {
+    router.push(`/payment/${orderId}?method=${selectedPaymentMethod}`);
+  };
+
   const backToCart = async () => {
     const cartId = localStorage.getItem('cartId');
 
@@ -383,11 +387,11 @@ const Order = () => {
               </div>
 
               <button
-                // onClick={handlePlaceOrder}
-                disabled={isLoading || !savedAddress}
+                onClick={handlePlaceOrder}
+                disabled={isLoading || !savedAddress || !selectedPaymentMethod}
                 className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {!savedAddress ? 'Add Address First' : isLoading ? 'Processing...' : 'Proceed to Pay'}
+                {!savedAddress ? 'Add Address First' : !selectedPaymentMethod ? 'Select Payment Method' : isLoading ? 'Processing...' : 'Proceed to Pay'}
               </button>
 
               <button
