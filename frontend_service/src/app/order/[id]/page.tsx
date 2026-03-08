@@ -50,9 +50,14 @@ const Order = () => {
           throw new Error('Failed to fetch the order');
         }
         const result = await response.json();
-        console.log('>>> order response <<<', result);
         setSavedAddress(result.payload.orderAddress);
         setOrderItems(result.payload.orderItems);
+        
+        const total = result.payload.orderItems.reduce(
+          (acc: number, item: any) => acc + item.price * item.quantity,
+          0
+        );
+        setPriceTotal(total);
       } catch (err: any) {
         console.error(err);
       }
