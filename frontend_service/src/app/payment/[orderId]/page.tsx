@@ -12,17 +12,17 @@ const PaymentPage = () => {
     const [order, setOrder] = useState<OrderSummary | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<string>("");
+    const [paymentMethod, setPaymentMethod] = useState<string>("cod");
 
-    // Card form state
-    const [cardNumber, setCardNumber] = useState("");
-    const [cardHolder, setCardHolder] = useState("");
-    const [expiry, setExpiry] = useState("");
-    const [cvv, setCvv] = useState("");
+    // Card form state — commented out until card payment is implemented
+    // const [cardNumber, setCardNumber] = useState("");
+    // const [cardHolder, setCardHolder] = useState("");
+    // const [expiry, setExpiry] = useState("");
+    // const [cvv, setCvv] = useState("");
 
-    // Mobile wallet state
-    const [mobileNumber, setMobileNumber] = useState("");
-    const [mpin, setMpin] = useState("");
+    // Mobile wallet state — commented out until wallet payments are implemented
+    // const [mobileNumber, setMobileNumber] = useState("");
+    // const [mpin, setMpin] = useState("");
 
     const [step, setStep] = useState<"details" | "success">("details");
 
@@ -48,11 +48,8 @@ const PaymentPage = () => {
                     address: payload.orderAddress,
                 });
 
-                // Pre-select payment method passed via query param
-                const searchParams = new URLSearchParams(window.location.search);
-                const method = searchParams.get("method");
-                if (method) setPaymentMethod(method);
-                else if (payload.paymentMethod) setPaymentMethod(payload.paymentMethod);
+                // Only COD is supported for now; always default to cod
+                setPaymentMethod("cod");
             } catch (err) {
                 console.error(err);
             } finally {
@@ -63,35 +60,21 @@ const PaymentPage = () => {
         if (orderId) fetchOrder();
     }, [orderId]);
 
-    const formatCardNumber = (value: string) =>
-        value
-            .replace(/\D/g, "")
-            .slice(0, 16)
-            .replace(/(.{4})/g, "$1 ")
-            .trim();
-
-    const formatExpiry = (value: string) =>
-        value
-            .replace(/\D/g, "")
-            .slice(0, 4)
-            .replace(/^(\d{2})(\d)/, "$1/$2");
+    // Formatters kept for future use when card payment is re-enabled
+    // const formatCardNumber = (value: string) => ...
+    // const formatExpiry = (value: string) => ...
 
     const handlePayment = async () => {
         try {
             setIsProcessing(true);
-            const response = await apiPost(`/payment/process`, {
-                orderId,
-                paymentMethod,
-                ...(paymentMethod === "card" && { cardNumber, cardHolder, expiry, cvv }),
-                ...(["easypaisa", "jazzcash"].includes(paymentMethod) && { mobileNumber, mpin }),
-            });
+            const response = await apiPost(`/order/${orderId}/payment/cod`, {});
 
-            if (!response.ok) throw new Error("Payment failed");
+            if (!response.ok) throw new Error("Failed to confirm order");
 
             setStep("success");
         } catch (err) {
             console.error(err);
-            alert("Payment failed. Please try again.");
+            alert("Failed to place order. Please try again.");
         } finally {
             setIsProcessing(false);
         }
@@ -120,20 +103,24 @@ const PaymentPage = () => {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center px-4">
                 <div className="bg-white rounded-2xl p-10 max-w-md w-full text-center shadow-2xl">
-                    <div className="text-7xl mb-4">✅</div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
-                    <p className="text-gray-500 mb-1">Your order has been placed.</p>
+                    <div className="text-7xl mb-4">📦</div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Placed!</h1>
+                    <p className="text-gray-600 mb-1 font-medium">Thank you for your order.</p>
                     <p className="text-gray-400 text-sm mb-6">
                         Order ID: <span className="font-mono text-gray-700">{order.orderId}</span>
                     </p>
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg p-4 mb-6 text-left text-sm">
+                        <p className="font-semibold mb-1">💰 Cash on Delivery</p>
+                        <p>Please keep <strong>${total}</strong> ready at the time of delivery.</p>
+                    </div>
                     <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left space-y-2">
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">Amount Paid</span>
+                            <span className="text-gray-500">Amount Due on Delivery</span>
                             <span className="font-bold text-gray-900">${total}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Payment Method</span>
-                            <span className="font-medium capitalize">{paymentMethod}</span>
+                            <span className="font-medium">Cash on Delivery</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Shipping to</span>
@@ -175,136 +162,40 @@ const PaymentPage = () => {
                         <div className="bg-white text-black rounded-xl p-6">
                             <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {[
-                                    { id: "easypaisa", label: "Easypaisa", img: "/EasyPaisa.png" },
-                                    { id: "jazzcash", label: "JazzCash", img: "/JazzCash.png" },
-                                    { id: "card", label: "Card", emoji: "💳" },
-                                    { id: "cod", label: "Cash on Delivery", emoji: "💰" },
-                                ].map((method) => (
-                                    <button
-                                        key={method.id}
-                                        onClick={() => setPaymentMethod(method.id)}
-                                        className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all cursor-pointer ${paymentMethod === method.id
-                                                ? "border-black bg-gray-100"
-                                                : "border-gray-200 hover:border-gray-400"
-                                            }`}
-                                    >
-                                        {method.img ? (
-                                            <img src={method.img} alt={method.label} className="w-10 h-10 object-contain mb-1" />
-                                        ) : (
-                                            <span className="text-2xl mb-1">{method.emoji}</span>
-                                        )}
-                                        <span className="text-xs font-medium text-center">{method.label}</span>
-                                    </button>
-                                ))}
+                                {/* Easypaisa — commented out until wallet payments are implemented */}
+                                {/* <button onClick={() => setPaymentMethod("easypaisa")} ...>
+                                    <img src="/EasyPaisa.png" ... /> Easypaisa
+                                </button> */}
+
+                                {/* JazzCash — commented out until wallet payments are implemented */}
+                                {/* <button onClick={() => setPaymentMethod("jazzcash")} ...>
+                                    <img src="/JazzCash.png" ... /> JazzCash
+                                </button> */}
+
+                                {/* Card — commented out until card payment is implemented */}
+                                {/* <button onClick={() => setPaymentMethod("card")} ...>
+                                    💳 Card
+                                </button> */}
+
+                                <button
+                                    onClick={() => setPaymentMethod("cod")}
+                                    className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all cursor-pointer ${
+                                        paymentMethod === "cod"
+                                            ? "border-black bg-gray-100"
+                                            : "border-gray-200 hover:border-gray-400"
+                                    }`}
+                                >
+                                    <span className="text-2xl mb-1">💰</span>
+                                    <span className="text-xs font-medium text-center">Cash on Delivery</span>
+                                </button>
                             </div>
                         </div>
 
-                        {/* Card Form */}
-                        {paymentMethod === "card" && (
-                            <div className="bg-white text-black rounded-xl p-6 space-y-4">
-                                <h2 className="text-xl font-semibold mb-2">Card Details</h2>
+                        {/* Card Form — commented out until card payment is implemented */}
+                        {/* {paymentMethod === "card" && ( ... )} */}
 
-                                {/* Card Preview */}
-                                <div className="bg-gradient-to-br from-gray-800 to-gray-900 text-white rounded-xl p-5 mb-4 shadow-lg">
-                                    <div className="flex justify-between items-start mb-6">
-                                        <span className="text-xs text-gray-400 uppercase tracking-widest">Credit / Debit</span>
-                                        <span className="text-2xl">💳</span>
-                                    </div>
-                                    <p className="text-lg font-mono tracking-widest mb-4">
-                                        {cardNumber || "•••• •••• •••• ••••"}
-                                    </p>
-                                    <div className="flex justify-between text-sm">
-                                        <span>{cardHolder || "FULL NAME"}</span>
-                                        <span>{expiry || "MM/YY"}</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Card Number *</label>
-                                    <input
-                                        type="text"
-                                        value={cardNumber}
-                                        onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                                        placeholder="1234 5678 9012 3456"
-                                        maxLength={19}
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Cardholder Name *</label>
-                                    <input
-                                        type="text"
-                                        value={cardHolder}
-                                        onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
-                                        placeholder="JOHN DOE"
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">Expiry *</label>
-                                        <input
-                                            type="text"
-                                            value={expiry}
-                                            onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                                            placeholder="MM/YY"
-                                            maxLength={5}
-                                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">CVV *</label>
-                                        <input
-                                            type="password"
-                                            value={cvv}
-                                            onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                                            placeholder="•••"
-                                            maxLength={4}
-                                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Mobile Wallet Form */}
-                        {(paymentMethod === "easypaisa" || paymentMethod === "jazzcash") && (
-                            <div className="bg-white text-black rounded-xl p-6 space-y-4">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <img
-                                        src={paymentMethod === "easypaisa" ? "/EasyPaisa.png" : "/JazzCash.png"}
-                                        alt={paymentMethod}
-                                        className="w-10 h-10 object-contain"
-                                    />
-                                    <h2 className="text-xl font-semibold capitalize">{paymentMethod} Details</h2>
-                                </div>
-                                <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-3 rounded text-sm">
-                                    💡 Enter your registered mobile number and MPIN to authorize the payment.
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Mobile Number *</label>
-                                    <input
-                                        type="tel"
-                                        value={mobileNumber}
-                                        onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                                        placeholder="03XXXXXXXXX"
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">MPIN *</label>
-                                    <input
-                                        type="password"
-                                        value={mpin}
-                                        onChange={(e) => setMpin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                                        placeholder="••••••"
-                                        maxLength={6}
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black font-mono"
-                                    />
-                                </div>
-                            </div>
-                        )}
+                        {/* Mobile Wallet Form — commented out until wallet payments are implemented */}
+                        {/* {(paymentMethod === "easypaisa" || paymentMethod === "jazzcash") && ( ... )} */}
 
                         {/* Cash on Delivery */}
                         {paymentMethod === "cod" && (

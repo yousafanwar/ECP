@@ -140,6 +140,27 @@ export class OrdersService {
         }
     }
 
+    async confirmCODOrder(order_id: string): Promise<void> {
+        const client = await this.pool.dbPool().connect();
+        try {
+            const totalRes = await client.query(
+                `SELECT COALESCE(SUM(price * quantity), 0) AS total FROM order_items WHERE order_id = $1`,
+                [order_id]
+            );
+            const total = totalRes.rows[0]?.total ?? 0;
+
+            await client.query(
+                `INSERT INTO payments (order_id, payment_type, amount, status) VALUES ($1, 'COD', $2, 'pending')`,
+                [order_id, total]
+            );
+        } catch (err) {
+            console.error('Error creating COD payment record:', err);
+            throw err;
+        } finally {
+            client.release();
+        }
+    }
+
     async deleteOrder(orderId: string) {
         const client = await this.pool.dbPool().connect();
         try {
