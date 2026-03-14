@@ -144,3 +144,10 @@ create table if not exists payments(
 );
 
 ALTER TABLE public.cart_items RENAME COLUMN cart_items TO cart_item_id;
+
+-- add is_guest flag to users table
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS is_guest BOOLEAN DEFAULT false;
+
+-- allow nullable password and email for guest users
+ALTER TABLE public.users ALTER COLUMN password DROP NOT NULL;
+ALTER TABLE public.users ALTER COLUMN email DROP NOT NULL;

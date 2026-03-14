@@ -4,34 +4,37 @@ export class LoginResponseDto {
   lastName: string;
   access_token: string;
   refresh_token: string;
-
-  constructor(
-    userId: string,
-    firstName: string,
-    lastName: string,
-    access_token: string,
-    refresh_token: string,
-  ) {
-    this.userId = userId;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.access_token = access_token;
-    this.refresh_token = refresh_token;
-  }
 }
 
 export class RefreshResponseDto {
   access_token: string;
-
-  constructor(access_token: string) {
-    this.access_token = access_token;
-  }
 }
 
 export class LogoutResponseDto {
   message: string;
+}
 
-  constructor(message: string = 'Logged out successfully') {
-    this.message = message;
-  }
+export class GuestSessionResponseDto {
+  guest_id: string;
+  access_token: string;
+}
+
+import { IsString, IsEmail, MinLength } from 'class-validator';
+
+export class ConvertGuestDto {
+  @IsString()
+  guestId: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(6)
+  password: string;
+
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
 }

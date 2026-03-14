@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { restoreAuth } from '@/app/store/authSlice';
+import { restoreAuth, setGuestSession } from '@/app/store/authSlice';
 
 /**
  * Component that initializes auth state from localStorage
@@ -17,9 +17,10 @@ export function AuthInitializer() {
       const accessToken = localStorage.getItem('accessToken');
       const userId = localStorage.getItem('userId');
       const userEmail = localStorage.getItem('userEmail');
+      const guestId = localStorage.getItem('guestId');
 
       if (accessToken && userId) {
-        // Get user info from localStorage
+        // Registered user session
         const firstName = localStorage.getItem('firstName') || '';
         const lastName = localStorage.getItem('lastName') || '';
 
@@ -32,7 +33,14 @@ export function AuthInitializer() {
               email: userEmail || undefined,
             },
             accessToken,
-            // refreshToken is in httpOnly cookie, automatically sent with requests
+          })
+        );
+      } else if (accessToken && guestId) {
+        // Guest session
+        dispatch(
+          setGuestSession({
+            guestId,
+            accessToken,
           })
         );
       }

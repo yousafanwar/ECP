@@ -20,7 +20,8 @@ const Cart = () => {
   const router = useRouter();
   const params = useParams();
   const cartId = params.id as string;
-  const { user } = useAuth();
+  const { user, isGuest, guestId } = useAuth();
+  const currentUserId = user?.userId || guestId;
 
   useEffect(() => {
     const getCartItems = async () => {
@@ -105,12 +106,12 @@ const Cart = () => {
     try {
       setError(null); // Clear previous errors
       
-      if (!user?.userId || !cartId) {
+      if (!currentUserId || !cartId) {
         console.error('User ID or Cart ID not available');
         return;
       }
 
-      const response = await apiPost(`/order/${user.userId}/${cartId}`, {});
+      const response = await apiPost(`/order/${currentUserId}/${cartId}`, {});
       const result = await response.json();
       
       if (!response.ok) {

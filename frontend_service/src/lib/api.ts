@@ -1,5 +1,5 @@
 import store, { type RootState } from "@/app/store/store";
-import { setAccessToken, clearAuth } from "@/app/store/authSlice";
+import { setAccessToken, clearAuth, setGuestSession } from "@/app/store/authSlice";
 
 // const API_BASE_URL = "http://localhost:5000";
 const API_BASE_URL = "http://192.168.100.58:5000";
@@ -208,5 +208,115 @@ export const apiPublic = (
   return apiCall(endpoint, {
     ...options,
     skipAuth: true,
+  });
+};
+
+// Get guest ID from Redux store
+
+const getGuestId = (): string | null => {
+  const state: RootState = store.getState();
+  return state.auth.guestId || null;
+};
+
+
+// Check if the current session is a guest session
+
+export const isGuestSession = (): boolean => {
+  const state: RootState = store.getState();
+  return state.auth.isGuest;
+};
+
+
+// Initialize a guest session — creates a guest user on the backend
+// and stores the session in Redux + localStorage.
+
+export const initGuestSession = async (): Promise<string | null> => {
+  try {
+    const response = await apiPublic('/auth/guest', {
+      method: 'POST',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Guest session creation failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    store.dispatch(
+      setGuestSession({
+        guestId: data.guest_id,
+        accessToken: data.access_token,
+      })
+    );
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('accessToken', data.access_token);
+      localStorage.setItem('guestId', data.guest_id);
+    }
+
+    return data.access_token;
+  } catch (error) {
+    console.error('Error creating guest session:', error);
+    return null;
+  }
+};
+
+
+//  Ensure a session exists — returns the user_id (or guest_id) if
+//  authenticated or a guest session is active.
+//  Creates a guest session if neither exists.
+
+export const ensureSession = async (): Promise<string | null> => {
+  const state: RootState = store.getState();
+
+  // Already authenticated as full user
+  if (state.auth.isAuthenticated && state.auth.user?.userId) {
+    return state.auth.user.userId;
+  }
+
+  // Already a guest
+  if (state.auth.isGuest && state.auth.guestId && state.auth.accessToken) {
+    return state.auth.guestId;
+  }
+
+  // Try to restore from localStorage
+  if (typeof window !== 'undefined') {
+    const storedGuestId = localStorage.getItem('guestId');
+    const storedToken = localStorage.getItem('accessToken');
+
+    if (storedGuestId && storedToken) {
+      store.dispatch(
+        setGuestSession({ guestId: storedGuestId, accessToken: storedToken })
+      );
+      return storedGuestId;
+    }
+  }
+
+  // No session at all — create a guest session
+  const token = await initGuestSession();
+  if (token) {
+    return store.getState().auth.guestId;
+  }
+  return null;
+};
+
+
+//  Convert a guest session to a registered account.
+//  Merges cart and order history.
+
+export const convertGuestToUser = async (registrationData: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}): Promise<Response> => {
+  const guestId = getGuestId();
+
+  return apiPublic('/auth/guest/convert', {
+    method: 'POST',
+    body: JSON.stringify({
+      ...registrationData,
+      guestId,
+    }),
   });
 };

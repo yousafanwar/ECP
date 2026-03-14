@@ -50,6 +50,9 @@ export default function LoginPage() {
             
             const result = await response.json();
             
+            // Clear any guest session data
+            localStorage.removeItem('guestId');
+
             // Dispatch to Redux store
             dispatch(setAuth({
                 user: {
@@ -59,7 +62,6 @@ export default function LoginPage() {
                     email: email,
                 },
                 accessToken: result.access_token,
-                // refreshToken is stored in httpOnly cookie automatically
             }));
 
             // Also store in localStorage for persistence (only access token)

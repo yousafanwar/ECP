@@ -40,7 +40,8 @@ const Order = () => {
   const router = useRouter();
   const params = useParams();
   const orderId = params.id;
-  const { user } = useAuth();
+  const { user, isGuest, guestId } = useAuth();
+  const currentUserId = user?.userId || guestId;
 
   useEffect(() => {
     const getOrderById = async () => {
@@ -70,14 +71,14 @@ const Order = () => {
 
   const updateAddress = async () => {
     try {
-      if (!user?.userId) {
+      if (!currentUserId) {
         console.error('User ID not available');
         return;
       }
 
       setIsSavingAddress(true);
 
-      const response = await apiPut(`/users/updateAddress/${user.userId}`, {
+      const response = await apiPut(`/users/updateAddress/${currentUserId}`, {
         street: newAddress.street,
         city: newAddress.city,
         state: newAddress.state,

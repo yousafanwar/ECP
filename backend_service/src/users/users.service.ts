@@ -18,7 +18,7 @@ export class UsersService {
     };
 
     async getUserById(userId: string): Promise<FetchUserById> {
-        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, email, is_deleted, created_at, updated_at FROM public.users where user_id = $1;', [userId]);
+        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, email, is_deleted, is_guest, created_at, updated_at FROM public.users where user_id = $1;', [userId]);
         if (response.rows.length === 0) {
             throw new NotFoundException(`No user found with the id: ${userId}`);
         }
@@ -139,5 +139,39 @@ export class UsersService {
             `UPDATE public.refresh_tokens SET is_revoked=true, updated_at=CURRENT_TIMESTAMP WHERE user_id=$1`,
             [userId],
         );
+    }
+
+    async createGuestUser(): Promise<{ user_id: string }> {
+        const guestId = require('crypto').randomUUID();
+        const placeholder = `guest_${guestId}`;
+
+        const response = await this.pool.dbPool().query(
+            `INSERT INTO public.users (first_name, last_name, email, is_guest)
+             VALUES ($1, $2, $3, true)
+             RETURNING user_id;`,
+            [placeholder, placeholder, `${placeholder}@guest.local`],
+        );
+        return response.rows[0];
+    }
+
+    async convertGuestToUser(
+        guestId: string,
+        email: string,
+        password: string,
+        firstName: string,
+        lastName: string,
+    ) {
+        const response = await this.pool.dbPool().query(
+            `UPDATE public.users
+             SET first_name = $1, last_name = $2, email = $3, password = $4, is_guest = false, updated_at = CURRENT_TIMESTAMP
+             WHERE user_id = $5 AND is_guest = true
+             RETURNING user_id, first_name, last_name, email, is_guest;`,
+            [firstName, lastName, email, password, guestId],
+        );
+
+        if (response.rows.length === 0) {
+            throw new NotFoundException('Guest user not found or already converted');
+        }
+        return response.rows[0];
     }
 }

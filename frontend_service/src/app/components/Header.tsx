@@ -5,7 +5,7 @@ import { LogoutButton } from './buttons/LogoutButton';
 import Link from 'next/link';
 
 export function Header() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isGuest } = useAuth();
 
   return (
     <header className="bg-gray-800 text-white p-4 mb-6">
@@ -23,6 +23,41 @@ export function Header() {
               <p className="font-semibold">{user.firstName} {user.lastName}</p>
             </div>
             <LogoutButton />
+          </div>
+        )}
+
+        {!isAuthenticated && isGuest && (
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-400">Guest</span>
+            <Link
+              href="/login"
+              className="px-4 py-2 bg-white text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 border border-white text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Register
+            </Link>
+          </div>
+        )}
+
+        {!isAuthenticated && !isGuest && (
+          <div className="flex items-center gap-4">
+            <Link
+              href="/login"
+              className="px-4 py-2 bg-white text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Login
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 border border-white text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Register
+            </Link>
           </div>
         )}
       </div>

@@ -11,6 +11,8 @@ interface AuthState {
   user: User | null;
   accessToken: string | null;
   isAuthenticated: boolean;
+  isGuest: boolean;
+  guestId: string | null;
   isLoading: boolean;
   error: string | null;
 }
@@ -19,6 +21,8 @@ const initialState: AuthState = {
   user: null,
   accessToken: null,
   isAuthenticated: false,
+  isGuest: false,
+  guestId: null,
   isLoading: false,
   error: null,
 };
@@ -39,7 +43,28 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
+      state.isGuest = false;
+      state.guestId = null;
       state.error = null;
+    },
+
+    // Set guest session
+    setGuestSession: (
+      state,
+      action: PayloadAction<{ guestId: string; accessToken: string }>
+    ) => {
+      state.isGuest = true;
+      state.guestId = action.payload.guestId;
+      state.accessToken = action.payload.accessToken;
+      state.isAuthenticated = false;
+      state.user = null;
+      state.error = null;
+    },
+
+    // Clear guest session
+    clearGuestSession: (state) => {
+      state.isGuest = false;
+      state.guestId = null;
     },
 
     // Update only the access token (after refresh)
@@ -52,6 +77,8 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
+      state.isGuest = false;
+      state.guestId = null;
       state.error = null;
     },
 
@@ -89,6 +116,8 @@ export const {
   setLoading,
   setError,
   restoreAuth,
+  setGuestSession,
+  clearGuestSession,
 } = authSlice.actions;
 
 export default authSlice.reducer;

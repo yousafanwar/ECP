@@ -4,10 +4,13 @@ import Link from "next/link";
 import AuthInput from "@/app/components/AuthInput";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { setAuth } from "@/app/store/authSlice";
+import { RootState } from "@/app/store/store";
 import { validateRegisterForm } from "@/lib/validations/authValidation";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 import { SUCCESS_MESSAGES } from "@/lib/constants/successMessages";
-import { apiPublic } from "@/lib/api";
+import { apiPublic, convertGuestToUser } from "@/lib/api";
 
 export default function RegisterPage() {
     const [firstName, setFirstName] = useState<string>("");
@@ -19,6 +22,9 @@ export default function RegisterPage() {
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
     const router = useRouter();
+    const dispatch = useDispatch();
+    const isGuest = useSelector((state: RootState) => state.auth.isGuest);
+    const guestId = useSelector((state: RootState) => state.auth.guestId);
 
     const handleRegister = async () => {
         // Validate form
@@ -40,15 +46,28 @@ export default function RegisterPage() {
         setSuccess("");
 
         try {
-            const response = await apiPublic("/auth/register", {
-                method: "POST",
-                body: JSON.stringify({
+            let response: Response;
+
+            if (isGuest && guestId) {
+                // Convert guest to registered user (preserves cart/orders)
+                response = await convertGuestToUser({
                     firstName,
                     lastName,
                     email,
                     password,
-                }),
-            });
+                });
+            } else {
+                // Standard registration
+                response = await apiPublic("/auth/register", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        firstName,
+                        lastName,
+                        email,
+                        password,
+                    }),
+                });
+            }
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -56,11 +75,38 @@ export default function RegisterPage() {
             }
 
             const result = await response.json();
-            setSuccess(SUCCESS_MESSAGES.REGISTRATION_SUCCESS);
 
-            setTimeout(() => {
-                router.push("/login");
-            }, 2000);
+            // Clear guest data from localStorage
+            localStorage.removeItem('guestId');
+
+            if (isGuest && guestId) {
+                // Guest conversion returns full auth data — log them in
+                dispatch(setAuth({
+                    user: {
+                        userId: result.userId,
+                        firstName: result.firstName,
+                        lastName: result.lastName,
+                        email: result.email,
+                    },
+                    accessToken: result.access_token,
+                }));
+
+                localStorage.setItem('accessToken', result.access_token);
+                localStorage.setItem('userId', result.userId);
+                localStorage.setItem('userEmail', result.email);
+                localStorage.setItem('firstName', result.firstName);
+                localStorage.setItem('lastName', result.lastName);
+
+                setSuccess('Account created! Your cart and orders have been preserved.');
+                setTimeout(() => {
+                    router.push('/');
+                }, 1500);
+            } else {
+                setSuccess(SUCCESS_MESSAGES.REGISTRATION_SUCCESS);
+                setTimeout(() => {
+                    router.push("/login");
+                }, 2000);
+            }
         } catch (err: any) {
             setError(err.message || ERROR_MESSAGES.REGISTRATION_ERROR);
             console.error(err);

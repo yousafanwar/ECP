@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import type { Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { ConvertGuestDto } from './auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -59,6 +60,42 @@ export class AuthController {
     // For now, we'll just return the new access token
     
     return res.json({
+      access_token: result.access_token,
+    });
+  }
+
+  @Post('guest')
+  async createGuestSession() {
+    return this.authService.createGuestSession();
+  }
+
+  @Post('guest/convert')
+  async convertGuestToUser(
+    @Body() body: ConvertGuestDto,
+    @Res() res: Response,
+  ) {
+    const result = await this.authService.convertGuestToUser(
+      body.guestId,
+      body.email,
+      body.password,
+      body.firstName,
+      body.lastName,
+    );
+
+    // Set refresh token as httpOnly cookie
+    res.cookie('refreshToken', result.refresh_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/auth',
+    });
+
+    return res.json({
+      userId: result.userId,
+      firstName: result.firstName,
+      lastName: result.lastName,
+      email: result.email,
       access_token: result.access_token,
     });
   }

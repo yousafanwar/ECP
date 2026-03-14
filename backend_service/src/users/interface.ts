@@ -4,6 +4,7 @@ export interface FetchUserById {
     last_name: string;
     email: string;
     is_deleted: boolean;
+    is_guest: boolean;
     created_at: string;
     updated_at: string;
 }

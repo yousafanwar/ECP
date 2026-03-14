@@ -2,7 +2,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addItem, updateCount } from '@/app/store/cartSlice';
 import { restoreCartCount } from '@/app/helperFunctions';
-import { apiPost } from "@/lib/api";
+import { apiPost, ensureSession } from "@/lib/api";
 import { RootState } from "@/app/store/store";
 import { useRouter } from "next/navigation";
 
@@ -17,8 +17,6 @@ const AddToCartBtn = (props: AddToCartProps) => {
     const dispatch = useDispatch();
     const router = useRouter();
     const selector = useSelector((state: any) => state.cartStore.items);
-    const userId = useSelector((state: RootState) => state.auth.user?.userId);
-    const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
     const getCartCount = async (cartId: string) => {
         const cartCount = await restoreCartCount(cartId);
@@ -26,10 +24,10 @@ const AddToCartBtn = (props: AddToCartProps) => {
     }
 
     const addItemToCart = async () => {
-        // Check if user is authenticated
-        if (!isAuthenticated || !userId) {
-            alert("Please login to add items to cart");
-            router.push('/login');
+        // Ensure a session exists (creates guest session if needed)
+        const sessionUserId = await ensureSession();
+        if (!sessionUserId) {
+            alert("Could not create a session. Please try again.");
             return;
         }
 
@@ -39,7 +37,7 @@ const AddToCartBtn = (props: AddToCartProps) => {
         
         try {
             const response = await apiPost('/cart', {
-                user_id: userId,
+                user_id: sessionUserId,
                 product_id: props.product_id,
                 quantity: props.qty
             });

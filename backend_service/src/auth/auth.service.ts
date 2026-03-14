@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcryptjs';
@@ -71,5 +71,68 @@ export class AuthService {
 
     async revokeUserTokens(userId: string): Promise<void> {
         await this.usersService.revokeAllTokens(userId);
+    }
+
+    async createGuestSession() {
+        // Create a guest user in the users table
+        const guestUser = await this.usersService.createGuestUser();
+
+        const payload = { sub: guestUser.user_id, role: 'guest' };
+        const accessToken = this.jwtService.sign(payload, {
+            expiresIn: '24h',
+        });
+
+        return {
+            guest_id: guestUser.user_id,
+            access_token: accessToken,
+        };
+    }
+
+    async convertGuestToUser(
+        guestId: string,
+        email: string,
+        password: string,
+        firstName: string,
+        lastName: string,
+    ) {
+        // Verify the guest user exists and is actually a guest
+        const guestUser = await this.usersService.getUserById(guestId);
+        if (!guestUser || !guestUser.is_guest) {
+            throw new BadRequestException('Invalid guest session');
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Convert guest to registered user
+        const updatedUser = await this.usersService.convertGuestToUser(
+            guestId,
+            email,
+            hashedPassword,
+            firstName,
+            lastName,
+        );
+
+        // Generate a new token with full user claims
+        const payload = { sub: updatedUser.user_id, email: updatedUser.email, name: updatedUser.first_name };
+        const accessToken = this.jwtService.sign(payload, {
+            expiresIn: '15m',
+        });
+
+        // Generate refresh token
+        const refreshToken = this.generateRefreshToken();
+        const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+
+        await this.usersService.storeRefreshToken(updatedUser.user_id, refreshTokenHash, expiresAt);
+
+        return {
+            userId: updatedUser.user_id,
+            firstName: updatedUser.first_name,
+            lastName: updatedUser.last_name,
+            email: updatedUser.email,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        };
     }
 }

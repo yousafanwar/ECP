@@ -15,5 +15,7 @@ export function useAuth() {
     accessToken: auth.accessToken,
     isLoading: auth.isLoading,
     error: auth.error,
+    isGuest: auth.isGuest,
+    guestId: auth.guestId,
   };
 }
