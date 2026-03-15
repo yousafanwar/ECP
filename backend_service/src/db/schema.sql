@@ -151,3 +151,14 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS is_guest BOOLEAN DEFAULT false
 -- allow nullable password and email for guest users
 ALTER TABLE public.users ALTER COLUMN password DROP NOT NULL;
 ALTER TABLE public.users ALTER COLUMN email DROP NOT NULL;
+
+-- Add 'confirmed' order status for COD orders (payment pending physical collection)
+ALTER TYPE order_status ADD VALUE IF NOT EXISTS 'confirmed' AFTER 'pending';
+
+-- Rename 'successful' -> 'completed' and add 'refunded' to payment_status
+ALTER TYPE payment_status RENAME VALUE 'successful' TO 'completed';
+ALTER TYPE payment_status ADD VALUE IF NOT EXISTS 'refunded';
+
+-- Add future payment method options
+ALTER TYPE payment_method ADD VALUE IF NOT EXISTS 'easypaisa';
+ALTER TYPE payment_method ADD VALUE IF NOT EXISTS 'jazzcash';

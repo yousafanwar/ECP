@@ -143,6 +143,8 @@ export class OrdersService {
     async confirmCODOrder(order_id: string): Promise<void> {
         const client = await this.pool.dbPool().connect();
         try {
+            await client.query('BEGIN');
+
             const totalRes = await client.query(
                 `SELECT COALESCE(SUM(price * quantity), 0) AS total FROM order_items WHERE order_id = $1`,
                 [order_id]
@@ -150,11 +152,19 @@ export class OrdersService {
             const total = totalRes.rows[0]?.total ?? 0;
 
             await client.query(
+                `UPDATE orders SET status = 'confirmed' WHERE order_id = $1`,
+                [order_id]
+            );
+
+            await client.query(
                 `INSERT INTO payments (order_id, payment_type, amount, status) VALUES ($1, 'COD', $2, 'pending')`,
                 [order_id, total]
             );
+
+            await client.query('COMMIT');
         } catch (err) {
-            console.error('Error creating COD payment record:', err);
+            await client.query('ROLLBACK');
+            console.error('Error confirming COD order:', err);
             throw err;
         } finally {
             client.release();
@@ -165,6 +175,16 @@ export class OrdersService {
         const client = await this.pool.dbPool().connect();
         try {
             await client.query('BEGIN');
+
+            // Restore stock quantities before deleting order items
+            await client.query(
+                `UPDATE products p
+                 SET stock_quantity = stock_quantity + oi.quantity
+                 FROM order_items oi
+                 WHERE oi.order_id = $1 AND p.product_id = oi.product_id`,
+                [orderId]
+            );
+
             await client.query(`DELETE FROM public.order_items WHERE order_id=$1;`, [orderId]);
             const orderRes = await client.query(`DELETE FROM public.orders WHERE order_id=$1;`, [orderId]);
             if (orderRes.rowCount === 0) {
