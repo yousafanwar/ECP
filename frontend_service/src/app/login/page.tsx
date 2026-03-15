@@ -117,6 +117,7 @@ export default function LoginPage() {
                             handleInputChange();
                         }}
                         value={email}
+                        hasError={error === "Email is required" || error === "Please enter a valid email address"}
                     />
 
                     <AuthInput
@@ -128,6 +129,7 @@ export default function LoginPage() {
                             handleInputChange();
                         }}
                         value={password}
+                        hasError={error === "Password is required"}
                     />
 
                     <div className="text-right">
