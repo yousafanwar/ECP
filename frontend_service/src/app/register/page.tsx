@@ -147,6 +147,7 @@ export default function RegisterPage() {
                             setFirstName(e.target.value);
                             handleInputChange();
                         }}
+                        hasError={error === "First name is required" || error === "First name must be at least 2 characters"}
                     />
 
                     <AuthInput
@@ -157,6 +158,7 @@ export default function RegisterPage() {
                             setLastName(e.target.value);
                             handleInputChange();
                         }}
+                        hasError={error === "Last name is required" || error === "Last name must be at least 2 characters"}
                     />
 
                     <AuthInput
@@ -168,6 +170,7 @@ export default function RegisterPage() {
                             setEmail(e.target.value);
                             handleInputChange();
                         }}
+                        hasError={error === "Email is required" || error === "Please enter a valid email address"}
                     />
 
                     <AuthInput
@@ -179,6 +182,7 @@ export default function RegisterPage() {
                             setPassword(e.target.value);
                             handleInputChange();
                         }}
+                        hasError={error === "Password is required" || error === "Password must be at least 6 characters"}
                     />
 
                     <AuthInput
@@ -190,6 +194,7 @@ export default function RegisterPage() {
                             setConfirmPassword(e.target.value);
                             handleInputChange();
                         }}
+                        hasError={error === "Please confirm your password" || error === "Passwords do not match"}
                     />
 
                     <button
