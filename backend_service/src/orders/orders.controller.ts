@@ -12,6 +12,12 @@ export class OrderController {
         return new ApiResponse(true, 'Order created successfully', response);
     }
 
+    @Get('user/:userId')
+    async getOrdersByUser(@Param('userId', ParseUUIDPipe) userId: string): Promise<ApiResponse> {
+        const response = await this.ordersService.getOrdersByUserId(userId);
+        return new ApiResponse(true, 'Orders fetched successfully', response);
+    }
+
     @Get(':orderId')
     async getOrderById(@Param('orderId', ParseUUIDPipe) orderId: string): Promise<ApiResponse> {
         const response = await this.ordersService.getOrderByOrderId(orderId);

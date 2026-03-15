@@ -111,12 +111,17 @@ export class OrdersService {
 
     async getOrderByOrderId(order_id) {
         try {
+            const orderStatusRes = await this.pool.dbPool().query(
+                `SELECT status FROM orders WHERE order_id = $1;`,
+                [order_id]
+            );
+            const orderStatus = orderStatusRes.rows[0]?.status ?? null;
+
             const orderAddressRes = await this.pool.dbPool().query(`select address.street, address.city, address.state, address.country, address."type"   
                 from address inner join orders on address.address_id = orders.address_id
                 where orders.order_id = $1;`, [order_id]);
 
             const orderAddress = orderAddressRes.rows[0];
-            console.log('orderItemsRes', orderAddressRes.rows[0]);
 
             const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
             from orders inner join order_items on orders.order_id = order_items.order_id 
@@ -133,7 +138,7 @@ export class OrdersService {
                     image_url: item.image_url
                 }
             });
-            return { orderAddress, orderItems };
+            return { orderStatus, orderAddress, orderItems };
         } catch (err) {
             console.error('Error while retrieving the order items', err);
             throw err;
@@ -182,6 +187,21 @@ export class OrdersService {
         } finally {
             client.release();
         }
+    }
+
+    async getOrdersByUserId(userId: string) {
+        const res = await this.pool.dbPool().query(
+            `SELECT o.order_id, o.status, o.created_at,
+                    COALESCE(SUM(oi.price * oi.quantity), 0) AS total,
+                    COUNT(oi.order_item_id) AS item_count
+             FROM orders o
+             LEFT JOIN order_items oi ON oi.order_id = o.order_id
+             WHERE o.user_id = $1
+             GROUP BY o.order_id
+             ORDER BY o.created_at DESC;`,
+            [userId]
+        );
+        return res.rows;
     }
 
     async deleteOrder(orderId: string) {

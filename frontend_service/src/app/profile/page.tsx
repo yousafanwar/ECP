@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { apiGet, apiPut } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
 import styles from './profile.module.css';
@@ -21,9 +22,26 @@ interface Address {
   type: string;
 }
 
+interface UserOrder {
+  order_id: string;
+  status: string;
+  created_at: string;
+  total: number;
+  item_count: number;
+}
+
 const ADDRESS_TYPES = ['both', 'shipping', 'billing'];
 
 const emptyAddress: Address = { street: '', city: '', state: '', country: '', type: 'both' };
+
+function statusClass(status: string) {
+  switch (status) {
+    case 'pending':   return styles.statusPending;
+    case 'confirmed': return styles.statusConfirmed;
+    case 'cancelled': return styles.statusCancelled;
+    default:          return styles.statusDefault;
+  }
+}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -32,12 +50,15 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [address, setAddress] = useState<Address | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
-
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [addressForm, setAddressForm] = useState<Address>(emptyAddress);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showOrders, setShowOrders] = useState(false);
+  const [orders, setOrders] = useState<UserOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersFetched, setOrdersFetched] = useState(false);
 
   // Redirect unauthenticated users
   useEffect(() => {
@@ -110,6 +131,25 @@ export default function ProfilePage() {
     }
   };
 
+  const toggleOrders = async () => {
+    setShowOrders(prev => !prev);
+    if (!ordersFetched && user?.userId) {
+      setOrdersLoading(true);
+      try {
+        const res = await apiGet(`/order/user/${user.userId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data.payload ?? []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch orders', err);
+      } finally {
+        setOrdersLoading(false);
+        setOrdersFetched(true);
+      }
+    }
+  };
+
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -171,6 +211,45 @@ export default function ProfilePage() {
             <p>{formatDate(profile.created_at)}</p>
           </div>
         </div>
+      </div>
+
+      {/* My Orders */}
+      <div>
+        <button
+          className={styles.ordersToggleBtn}
+          style={{ borderRadius: showOrders ? '12px 12px 0 0' : '12px' }}
+          onClick={toggleOrders}
+        >
+          <span>My Orders</span>
+          <span className={`${styles.chevron} ${showOrders ? styles.chevronOpen : ''}`}>▼</span>
+        </button>
+
+        {showOrders && (
+          <div className={styles.ordersPanel}>
+            {ordersLoading ? (
+              <p className={styles.ordersLoading}>Loading orders…</p>
+            ) : orders.length === 0 ? (
+              <p className={styles.noOrders}>You have no orders yet.</p>
+            ) : (
+              <ul className={styles.ordersList}>
+                {orders.map(order => (
+                  <li key={order.order_id} className={styles.orderRow}>
+                    <div>
+                      <p className={styles.orderId}>#{order.order_id.split('-')[0].toUpperCase()}</p>
+                      <p className={styles.orderDate}>{formatDate(order.created_at)}</p>
+                    </div>
+                    <div className={styles.orderMeta}>
+                      <span className={styles.orderItemCount}>{order.item_count} item{Number(order.item_count) !== 1 ? 's' : ''}</span>
+                      <span className={styles.orderTotal}>${Number(order.total).toFixed(2)}</span>
+                      <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>{order.status}</span>
+                      <Link href={`/order/${order.order_id}`} className={styles.viewOrderBtn}>View</Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── Address Card ── */}

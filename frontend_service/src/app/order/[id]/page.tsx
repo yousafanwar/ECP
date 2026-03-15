@@ -24,6 +24,7 @@ interface Address {
 
 const Order = () => {
   const [orderItems, setOrderItems] = useState<CartItem[]>([]);
+  const [orderStatus, setOrderStatus] = useState<string | null>(null);
   const [priceTotal, setPriceTotal] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
   const [savedAddress, setSavedAddress] = useState<Address | null>(null);
@@ -51,6 +52,7 @@ const Order = () => {
           throw new Error('Failed to fetch the order');
         }
         const result = await response.json();
+        setOrderStatus(result.payload.orderStatus);
         setSavedAddress(result.payload.orderAddress);
         setOrderItems(result.payload.orderItems);
         
@@ -137,10 +139,61 @@ const Order = () => {
     }
   }
 
+  const isFinalized = orderStatus === 'confirmed' || orderStatus === 'paid';
+
   return (
     <div className="min-h-screen bg-black text-white py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-400">Checkout</h1>
+        <h1 className="text-4xl font-bold text-center mb-8 text-gray-400">
+          {isFinalized ? 'Order Details' : 'Checkout'}
+        </h1>
+
+        {isFinalized ? (
+          <div className="max-w-lg mx-auto">
+            <div className="bg-white text-black rounded-lg p-6">
+              <div className="mb-4 py-3 text-center text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg">
+                {orderStatus === 'confirmed' ? '✓ Order confirmed — awaiting delivery' : '✓ Payment received'}
+              </div>
+
+              <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
+
+              <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
+                {orderItems.map((item) => (
+                  <div key={item.name} className="flex gap-4">
+                    <img src={item.image_url} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{item.name}</p>
+                      <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                      <p className="text-sm font-semibold">${item.price * item.quantity}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t pt-4 space-y-3">
+                <div className="flex justify-between">
+                  <span>Price Total</span>
+                  <span>${priceTotal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Shipping</span>
+                  <span>$30</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t pt-3">
+                  <span>Total</span>
+                  <span>${priceTotal + 30}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => router.push('/')}
+                className="w-full bg-black text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
+              >
+                Continue Shopping
+              </button>
+            </div>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-white text-black rounded-lg p-6">
@@ -341,23 +394,32 @@ const Order = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handlePlaceOrder}
-                disabled={isLoading || !savedAddress || !selectedPaymentMethod}
-                className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {!savedAddress ? 'Add Address First' : !selectedPaymentMethod ? 'Select Payment Method' : isLoading ? 'Processing...' : 'Proceed to Pay'}
-              </button>
+              {orderStatus === 'confirmed' ? (
+                <div className="mt-6 py-3 text-center text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg">
+                  ✓ Order confirmed
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={handlePlaceOrder}
+                    disabled={isLoading || !savedAddress || !selectedPaymentMethod}
+                    className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    {!savedAddress ? 'Add Address First' : !selectedPaymentMethod ? 'Select Payment Method' : isLoading ? 'Processing...' : 'Proceed to Pay'}
+                  </button>
 
-              <button
-                onClick={backToCart}
-                className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors"
-              >
-                Back to Cart
-              </button>
+                  <button
+                    onClick={backToCart}
+                    className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    Back to Cart
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
