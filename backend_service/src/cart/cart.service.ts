@@ -70,7 +70,7 @@ export class CartService {
           product_id: item.product_id,
           quantity: item.quantity,
           name: item.name,
-          price: item.price * item.quantity,
+          price: item.price, // unit price — frontend calculates line totals
           image_url: item.image_url
         }
       });
@@ -158,10 +158,13 @@ export class CartService {
       }
       const cartQty = await client.query('select quantity from cart_items where cart_id=$1;', [body.cart_id]);
       const totalCartQty = cartQty.rows.reduce((acc, item) => acc += item.quantity, 0);
+
+      await client.query('COMMIT');
+
+      // Calculate price AFTER commit so the pool connection sees the updated quantities
       const CalCartPrice = await this.calculateCartTotalPrice(body.cart_id);
       console.log('CalCartPrice', CalCartPrice)
 
-      await client.query('COMMIT');
       return { totalCartQty, updatedItemQty, CalCartPrice };
 
     } catch (err) {

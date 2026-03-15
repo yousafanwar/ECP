@@ -1,13 +1,16 @@
 'use client';
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useDispatch } from "react-redux";
 import { apiGet, apiPost } from "@/lib/api";
 import { OrderItem, Address, OrderSummary } from "@/app/interfaces";
+import { resetCount } from "@/app/store/cartSlice";
 
 const PaymentPage = () => {
     const router = useRouter();
     const params = useParams();
     const orderId = params.orderId;
+    const dispatch = useDispatch();
 
     const [order, setOrder] = useState<OrderSummary | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -70,6 +73,9 @@ const PaymentPage = () => {
             const response = await apiPost(`/order/${orderId}/payment/cod`, {});
 
             if (!response.ok) throw new Error("Failed to confirm order");
+
+            localStorage.removeItem('cartId');
+            dispatch(resetCount());
 
             setStep("success");
         } catch (err) {

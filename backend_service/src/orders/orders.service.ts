@@ -118,7 +118,7 @@ export class OrdersService {
             const orderAddress = orderAddressRes.rows[0];
             console.log('orderItemsRes', orderAddressRes.rows[0]);
 
-            const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, products.name, products.price , product_images.image_url, product_images.is_hero 
+            const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
             from orders inner join order_items on orders.order_id = order_items.order_id 
             inner join products on products.product_id = order_items.product_id 
             inner join product_images 
@@ -128,7 +128,7 @@ export class OrdersService {
                 return {
                     quantity: item.quantity,
                     name: item.name,
-                    price: item.price * item.quantity,
+                    price: item.price,
                     isHeroImage: item.is_hero,
                     image_url: item.image_url
                 }
@@ -160,6 +160,19 @@ export class OrdersService {
                 `INSERT INTO payments (order_id, payment_type, amount, status) VALUES ($1, 'COD', $2, 'pending')`,
                 [order_id, total]
             );
+
+            // Clear the cart that was used to create this order
+            const cartRes = await client.query(
+                `SELECT cart.cart_id FROM cart
+                 INNER JOIN orders ON orders.user_id = cart.user_id
+                 WHERE orders.order_id = $1`,
+                [order_id]
+            );
+            if (cartRes.rows.length > 0) {
+                const cart_id = cartRes.rows[0].cart_id;
+                await client.query(`DELETE FROM cart_items WHERE cart_id = $1`, [cart_id]);
+                await client.query(`DELETE FROM cart WHERE cart_id = $1`, [cart_id]);
+            }
 
             await client.query('COMMIT');
         } catch (err) {
