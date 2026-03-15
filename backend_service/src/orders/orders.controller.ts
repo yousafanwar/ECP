@@ -18,6 +18,12 @@ export class OrderController {
         return new ApiResponse(true, 'Order fetched sucessfully', response);
     }
 
+    @Post(':orderId/payment/cod')
+    async confirmCODOrder(@Param('orderId', ParseUUIDPipe) orderId: string): Promise<ApiResponse> {
+        await this.ordersService.confirmCODOrder(orderId);
+        return new ApiResponse(true, 'Order confirmed for cash on delivery', null);
+    }
+
     @Delete(':orderId')
     async deleteOrderById(@Param('orderId', ParseUUIDPipe) orderId: string): Promise<ApiResponse> {
         const response = this.ordersService.deleteOrder(orderId);

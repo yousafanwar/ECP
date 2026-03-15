@@ -29,7 +29,7 @@ const Order = () => {
   const [savedAddress, setSavedAddress] = useState<Address | null>(null);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>("cod");
   const [newAddress, setNewAddress] = useState<Address>({
     street: "",
     city: "",
@@ -113,7 +113,8 @@ const Order = () => {
   };
 
   const handlePlaceOrder = () => {
-    router.push(`/payment/${orderId}?method=${selectedPaymentMethod}`);
+    // router.push(`/payment/${orderId}?method=${selectedPaymentMethod}`);
+    router.push(`/payment/${orderId}?method=cod`);
   };
 
   const backToCart = async () => {
@@ -295,63 +296,11 @@ const Order = () => {
               )}
             </div>
 
-            {/* Payment Information */}
-            <div className="bg-white text-black rounded-lg p-6">
-              <h2 className="text-2xl font-semibold mb-6">Select Payment Method</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {/* Easypaisa */}
-                <button
-                  onClick={() => setSelectedPaymentMethod("easypaisa")}
-                  className={`flex flex-col cursor-pointer items-center justify-center p-4 rounded-lg border-2 transition-all ${selectedPaymentMethod === "easypaisa"
-                    ? "border-black bg-gray-100"
-                    : "border-gray-200 hover:border-gray-300"
-                    }`}
-                >
-                  <div className="mb-2">
-                    <img src="/EasyPaisa.png" alt="Easy Paisa" className="w-12 h-12 object-contain" />
-                  </div>
-                  <span className="text-sm font-medium text-center">Easypaisa</span>
-                </button>
-
-                {/* JazzCash */}
-                <button
-                  onClick={() => setSelectedPaymentMethod("jazzcash")}
-                  className={`flex flex-col cursor-pointer items-center justify-center p-4 rounded-lg border-2 transition-all ${selectedPaymentMethod === "jazzcash"
-                    ? "border-black bg-gray-100"
-                    : "border-gray-200 hover:border-gray-300"
-                    }`}
-                >
-                  <div className="mb-2">
-                    <img src="/JazzCash.png" alt="Jazz Cash" className="w-12 h-12 object-contain" />
-                  </div>
-                  <span className="text-sm font-medium text-center">JazzCash</span>
-                </button>
-
-                {/* Credit/Debit Card */}
-                <button
-                  onClick={() => setSelectedPaymentMethod("card")}
-                  className={`flex flex-col cursor-pointer items-center justify-center p-4 rounded-lg border-2 transition-all ${selectedPaymentMethod === "card"
-                    ? "border-black bg-gray-100"
-                    : "border-gray-200 hover:border-gray-300"
-                    }`}
-                >
-                  <div className="text-3xl mb-2">💳</div>
-                  <span className="text-sm font-medium text-center">Credit/Debit Card</span>
-                </button>
-
-                {/* Cash on Delivery */}
-                <button
-                  onClick={() => setSelectedPaymentMethod("cod")}
-                  className={`flex flex-col cursor-pointer items-center justify-center p-4 rounded-lg border-2 transition-all ${selectedPaymentMethod === "cod"
-                    ? "border-black bg-gray-100"
-                    : "border-gray-200 hover:border-gray-300"
-                    }`}
-                >
-                  <div className="text-3xl mb-2">💰</div>
-                  <span className="text-sm font-medium text-center">Cash on Delivery</span>
-                </button>
-              </div>
-            </div>
+            {/* Payment Information — only COD supported for now, selector hidden */}
+            {/* <div className="bg-white text-black rounded-lg p-6">
+              <h2>Select Payment Method</h2>
+              ...
+            </div> */}
           </div>
 
           {/* Right Column - Order Summary */}

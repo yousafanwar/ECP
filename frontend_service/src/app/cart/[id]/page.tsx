@@ -23,15 +23,26 @@ const Cart = () => {
   const { user, isGuest, guestId } = useAuth();
   const currentUserId = user?.userId || guestId;
 
+  const isValidUUID = (value: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+
   useEffect(() => {
     const getCartItems = async () => {
       if (!cartId) return;
+
+      if (!isValidUUID(cartId)) {
+        localStorage.removeItem('cartId');
+        dispatch(resetCount());
+        router.replace('/');
+        return;
+      }
+
       try {
         const response = await apiGet(`/cart/${cartId}`);
         const result = await response.json();
         const totalPrice = result.payload.reduce(
           (acc: number, item: cartItemsArr) =>
-            acc + item.price, // price from API is already unit_price * quantity
+            acc + item.price * item.quantity,
           0
         );
         setCartItems(result.payload);
@@ -86,11 +97,7 @@ const Cart = () => {
       setCartItems(prevItems =>
         prevItems.map(item =>
           item.cart_item_id === cart_item_id
-            ? {
-                ...item,
-                quantity: response.payload.updatedItemQty,
-                price: (item.price / item.quantity) * response.payload.updatedItemQty
-              }
+            ? { ...item, quantity: response.payload.updatedItemQty }
             : item
         )
       );

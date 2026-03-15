@@ -118,7 +118,7 @@ export class OrdersService {
             const orderAddress = orderAddressRes.rows[0];
             console.log('orderItemsRes', orderAddressRes.rows[0]);
 
-            const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, products.name, products.price , product_images.image_url, product_images.is_hero 
+            const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
             from orders inner join order_items on orders.order_id = order_items.order_id 
             inner join products on products.product_id = order_items.product_id 
             inner join product_images 
@@ -128,7 +128,7 @@ export class OrdersService {
                 return {
                     quantity: item.quantity,
                     name: item.name,
-                    price: item.price * item.quantity,
+                    price: item.price,
                     isHeroImage: item.is_hero,
                     image_url: item.image_url
                 }
@@ -140,10 +140,64 @@ export class OrdersService {
         }
     }
 
+    async confirmCODOrder(order_id: string): Promise<void> {
+        const client = await this.pool.dbPool().connect();
+        try {
+            await client.query('BEGIN');
+
+            const totalRes = await client.query(
+                `SELECT COALESCE(SUM(price * quantity), 0) AS total FROM order_items WHERE order_id = $1`,
+                [order_id]
+            );
+            const total = totalRes.rows[0]?.total ?? 0;
+
+            await client.query(
+                `UPDATE orders SET status = 'confirmed' WHERE order_id = $1`,
+                [order_id]
+            );
+
+            await client.query(
+                `INSERT INTO payments (order_id, payment_type, amount, status) VALUES ($1, 'COD', $2, 'pending')`,
+                [order_id, total]
+            );
+
+            // Clear the cart that was used to create this order
+            const cartRes = await client.query(
+                `SELECT cart.cart_id FROM cart
+                 INNER JOIN orders ON orders.user_id = cart.user_id
+                 WHERE orders.order_id = $1`,
+                [order_id]
+            );
+            if (cartRes.rows.length > 0) {
+                const cart_id = cartRes.rows[0].cart_id;
+                await client.query(`DELETE FROM cart_items WHERE cart_id = $1`, [cart_id]);
+                await client.query(`DELETE FROM cart WHERE cart_id = $1`, [cart_id]);
+            }
+
+            await client.query('COMMIT');
+        } catch (err) {
+            await client.query('ROLLBACK');
+            console.error('Error confirming COD order:', err);
+            throw err;
+        } finally {
+            client.release();
+        }
+    }
+
     async deleteOrder(orderId: string) {
         const client = await this.pool.dbPool().connect();
         try {
             await client.query('BEGIN');
+
+            // Restore stock quantities before deleting order items
+            await client.query(
+                `UPDATE products p
+                 SET stock_quantity = stock_quantity + oi.quantity
+                 FROM order_items oi
+                 WHERE oi.order_id = $1 AND p.product_id = oi.product_id`,
+                [orderId]
+            );
+
             await client.query(`DELETE FROM public.order_items WHERE order_id=$1;`, [orderId]);
             const orderRes = await client.query(`DELETE FROM public.orders WHERE order_id=$1;`, [orderId]);
             if (orderRes.rowCount === 0) {
