@@ -29,6 +29,13 @@ export class UsersController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Get(':id/address')
+    async getUserAddress(@Param('id', ParseUUIDPipe) userId: string): Promise<ApiResponse> {
+        const response = await this.userService.getUserAddress(userId);
+        return new ApiResponse(true, 'Address retrieved successfully', response);
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Post()
     async createNewUser(@Body() userData: createNewUserDTO): Promise<ApiResponse> {
         const response = await this.userService.createUser(userData);

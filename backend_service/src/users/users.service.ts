@@ -51,6 +51,15 @@ export class UsersService {
     };
 
     // for the time being user would only be able to add one address later need to add db level enforcement as well
+    async getUserAddress(userId: string) {
+        await this.getUserById(userId);
+        const response = await this.pool.dbPool().query(
+            'SELECT address_id, street, city, state, country, type, created_at, updated_at FROM public.address WHERE user_id = $1;',
+            [userId]
+        );
+        return response.rows[0] || null;
+    }
+
     async addAddress(userId: string, data: createNewAddressDTO) {
         await this.getUserById(userId);
         const findAddress = await this.pool.dbPool().query('SELECT address_id from public.address WHERE user_id=$1;', [userId]);

@@ -22,6 +22,12 @@ export function Header() {
               <p className="text-gray-300">Welcome,</p>
               <p className="font-semibold">{user.firstName} {user.lastName}</p>
             </div>
+            <Link
+              href="/profile"
+              className="px-4 py-2 border border-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"
+            >
+              Profile
+            </Link>
             <LogoutButton />
           </div>
         )}
