@@ -29,5 +29,20 @@ export interface GetAllProducts {
     image_url: string
     category_title: string
     brand_title: string
+}
 
+export interface UpdatedProduct {
+    product_id: string;
+    name: string;
+    price: number;
+    sku: number;
+    stock_quantity: number;
+    description: string;
+    category_id: string;
+    brand_id: string;
+    updated_at: string;
+}
+
+export interface AddedImages {
+    imageIds: string[];
 }

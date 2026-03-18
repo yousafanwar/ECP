@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { DbService } from "src/db/db.service";
-import { AddProductDTO } from "./dto";
-import { GetIndProduct, GetAllProducts } from "./interface";
+import { AddProductDTO, UpdateProductDTO, AddProductImagesDTO } from "./dto";
+import { GetIndProduct, GetAllProducts, UpdatedProduct, AddedImages } from "./interface";
 
 @Injectable()
 export class ProductsService {
@@ -45,6 +45,74 @@ export class ProductsService {
             throw new NotFoundException("No products found")
         }
         return response.rows;
+    }
+
+    async updateProduct(productId: string, product: UpdateProductDTO): Promise<UpdatedProduct> {
+        const exists = await this.pool.dbPool().query(
+            `SELECT product_id FROM public.products WHERE product_id = $1`,
+            [productId]
+        );
+        if (exists.rows.length === 0) {
+            throw new NotFoundException(`Product with id '${productId}' not found`);
+        }
+
+        const result = await this.pool.dbPool().query(
+            `UPDATE public.products
+             SET
+               name           = COALESCE($1, name),
+               price          = COALESCE($2, price),
+               sku            = COALESCE($3, sku),
+               stock_quantity = COALESCE($4, stock_quantity),
+               description    = COALESCE($5, description),
+               category_id    = COALESCE($6::uuid, category_id),
+               brand_id       = COALESCE($7::uuid, brand_id),
+               updated_at     = CURRENT_TIMESTAMP
+             WHERE product_id = $8
+             RETURNING product_id, name, price, sku, stock_quantity, description, category_id, brand_id, updated_at;`,
+            [
+                product.name ?? null,
+                product.price ?? null,
+                product.sku ?? null,
+                product.stock_quantity ?? null,
+                product.description ?? null,
+                product.category_id ?? null,
+                product.brand_id ?? null,
+                productId,
+            ]
+        );
+        return result.rows[0];
+    }
+
+    async addProductImages(productId: string, dto: AddProductImagesDTO): Promise<AddedImages> {
+        const exists = await this.pool.dbPool().query(
+            `SELECT product_id FROM public.products WHERE product_id = $1`,
+            [productId]
+        );
+        if (exists.rows.length === 0) {
+            throw new NotFoundException(`Product with id '${productId}' not found`);
+        }
+
+        const client = await this.pool.dbPool().connect();
+        try {
+            await client.query('BEGIN');
+            const imageIds: string[] = [];
+            for (const url of dto.image_urls) {
+                const res = await client.query(
+                    `INSERT INTO public.product_images(product_id, image_url, is_hero)
+                     VALUES($1, $2, false)
+                     RETURNING image_id;`,
+                    [productId, url]
+                );
+                imageIds.push(res.rows[0].image_id);
+            }
+            await client.query('COMMIT');
+            return { imageIds };
+        } catch (err) {
+            await client.query('ROLLBACK');
+            throw err;
+        } finally {
+            client.release();
+        }
     }
 
     async getIndProduct(productId: string): Promise<GetIndProduct> {

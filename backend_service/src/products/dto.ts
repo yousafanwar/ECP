@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, MaxLength, IsUUID, IsBoolean, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsArray, MaxLength, IsUUID, IsBoolean, IsNumber } from 'class-validator';
 
 export class AddProductDTO {
     @IsString()
@@ -36,4 +36,42 @@ export class AddProductDTO {
 
     @IsBoolean()
     is_hero: boolean
+}
+
+export class UpdateProductDTO {
+    @IsOptional()
+    @IsString()
+    @MaxLength(255)
+    name?: string;
+
+    @IsOptional()
+    @IsNumber()
+    price?: number;
+
+    @IsOptional()
+    @IsNumber()
+    sku?: number;
+
+    @IsOptional()
+    @IsNumber()
+    stock_quantity?: number;
+
+    @IsOptional()
+    @IsString()
+    description?: string;
+
+    @IsOptional()
+    @IsUUID()
+    category_id?: string;
+
+    @IsOptional()
+    @IsUUID()
+    brand_id?: string;
+}
+
+export class AddProductImagesDTO {
+    @IsArray()
+    @IsString({ each: true })
+    @IsNotEmpty({ each: true })
+    image_urls: string[];
 }
