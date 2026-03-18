@@ -10,6 +10,7 @@ export interface ProductData {
     brand_title: string;
     brand_description: string;
     heroImageData: HeroImage;
+    images?: HeroImage[];
     created_at: string;
     updated_at: string;
 }
@@ -46,6 +47,18 @@ export interface OrderItem {
   price: number;
   quantity: number;
   image_url: string;
+}
+
+export interface ProductItem {
+  product_id: string;
+  name: string;
+  price: number;
+  category_id: string;
+  category_title: string;
+  brand_id: string;
+  brand_title: string;
+  stock_quantity: number;
+  [key: string]: any;
 }
 
 export interface Address {

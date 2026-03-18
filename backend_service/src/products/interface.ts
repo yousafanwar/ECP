@@ -27,5 +27,7 @@ export interface GetAllProducts {
     stock_quantity: number
     description: string
     image_url: string
+    category_title: string
+    brand_title: string
 
 }

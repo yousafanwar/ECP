@@ -30,8 +30,17 @@ export class ProductsService {
     };
 
     async getAllProducts(): Promise<GetAllProducts[]> {
-        const response = await this.pool.dbPool().query(`select products.product_id, products.name, products.price, products.stock_quantity,products.description, 
-            product_images.image_url from public.products inner join public.product_images on public.products.product_id = public.product_images.product_id where product_images.is_hero = true;`);
+        const response = await this.pool.dbPool().query(`
+            SELECT products.product_id, products.name, products.price, products.stock_quantity, products.description,
+                product_images.image_url,
+                categories.name AS category_title,
+                brands.name AS brand_title
+            FROM public.products
+            INNER JOIN public.product_images ON public.products.product_id = public.product_images.product_id
+            LEFT JOIN public.categories ON public.products.category_id = public.categories.category_id
+            LEFT JOIN public.brands ON public.products.brand_id = public.brands.brand_id
+            WHERE product_images.is_hero = true;
+        `);
         if (response.rows.length === 0) {
             throw new NotFoundException("No products found")
         }
@@ -43,20 +52,26 @@ export class ProductsService {
         if (response.rows.length === 0) {
             throw new NotFoundException(`Product with the id: '${productId}' not found`);
         }
+        const heroRow = response.rows.find(r => r.is_hero) ?? response.rows[0];
+        const additionalImages = response.rows
+            .filter(r => !r.is_hero)
+            .map(r => ({ image_id: r.image_id, image_url: r.image_url, is_hero: r.is_hero }));
+
         const dataObj = {
-            brand_description: response.rows[0].brand_description,
-            brand_id: response.rows[0].brand_id,
-            brand_title: response.rows[0].brand_title,
-            category_id: response.rows[0].category_id,
-            category_title: response.rows[0].category_title,
-            description: response.rows[0].description,
-            heroImageData: { image_id: response.rows[0].image_id, image_url: response.rows[0].image_url, is_hero: response.rows[0].is_hero },
-            price: response.rows[0].price,
-            product_title: response.rows[0].product_title,
-            sku: response.rows[0].sku,
-            stock_quantity: response.rows[0].stock_quantity,
-            updated_at: response.rows[0].updated_at,
-            created_at: response.rows[0].created_at,
+            brand_description: heroRow.brand_description,
+            brand_id: heroRow.brand_id,
+            brand_title: heroRow.brand_title,
+            category_id: heroRow.category_id,
+            category_title: heroRow.category_title,
+            description: heroRow.description,
+            heroImageData: { image_id: heroRow.image_id, image_url: heroRow.image_url, is_hero: heroRow.is_hero },
+            images: additionalImages,
+            price: heroRow.price,
+            product_title: heroRow.product_title,
+            sku: heroRow.sku,
+            stock_quantity: heroRow.stock_quantity,
+            updated_at: heroRow.updated_at,
+            created_at: heroRow.created_at,
         }
         return dataObj;
     }

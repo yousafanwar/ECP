@@ -9,6 +9,7 @@ import { apiGet } from "@/lib/api";
 const ProductPage = ({ params }: { params: { id: string } }) => {
 
   const [result, setResult] = useState<ProductData | null>(null);
+  const [mainImage, setMainImage] = useState<string>("");
   const [productQty, setProductQty] = useState<number>(1);
   const [productId, setProductId] = useState<string>("");
   const [disableIncrement, setDisableIncrement] = useState<boolean>(false);
@@ -25,6 +26,7 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
         setLowQty(true)
       };
       setResult(data.payload);
+      setMainImage(data.payload.heroImageData.image_url);
       setProductId(id);
     };
 
@@ -77,16 +79,43 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
     setDisableIncrement(false);
   };
 
+  // Get all images: hero image first, then additional images
+  const getAllImages = () => {
+    if (!result) return [];
+    const images = [result.heroImageData];
+    if (result.images && result.images.length > 0) {
+      images.push(...result.images);
+    }
+    return images;
+  };
+
   return (
     <div>
       {result &&
         <div className={styles.productContainer}>
           <div className={styles.imageSection}>
-            <img src={result.heroImageData.image_url} alt="Product" className={styles.mainImage} />
-            <div className={styles.thumbnailRow}>
-              <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
-              <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
-            </div>
+            <img src={mainImage} alt="Product" className={styles.mainImage} />
+            {getAllImages().length > 1 && (
+              <div className={styles.thumbnailRow}>
+                {getAllImages().map((img, index) => (
+                  <img
+                    key={index}
+                    src={img.image_url}
+                    alt={`Product view ${index + 1}`}
+                    className={styles.thumbnail}
+                    onClick={() => setMainImage(img.image_url)}
+                    style={{
+                      cursor: "pointer",
+                      opacity: mainImage === img.image_url ? 1 : 0.6,
+                      border: mainImage === img.image_url ? "2px solid #3b82f6" : "none",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+            <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
+            <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
           </div>
           <div className={styles.detailsSection}>
             <h1 className={styles.productTitle}>{result.product_title}</h1>
