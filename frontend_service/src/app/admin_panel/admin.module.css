@@ -1,7 +1,27 @@
-.header {
+.pageContainer {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.subtitle {
+    color: #9ca3af;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.actionButtons {
     display: flex;
-    justify-content: center;
-    font-size: 5vh;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
 }
 
 .centerDiv {
@@ -10,18 +30,51 @@
     align-items: center;
 }
 
+.formSection {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.formActions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding: 0 0.5rem;
+}
+
 .addBtn {
     color: black;
     background-color: white;
     cursor: pointer;
-    padding: 5px;
+    padding: 8px 16px;
     border-radius: 5px;
     font-weight: bold;
+    border: 1px solid transparent;
 }
 
 .addBtn:hover {
     color: white;
     background-color: black;
-    border: solid white;
+    border: 1px solid white;
+    transition: ease 0.1s;
+}
+
+.cancelBtn {
+    color: #9ca3af;
+    background-color: transparent;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancelBtn:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
     transition: ease 0.1s;
 }

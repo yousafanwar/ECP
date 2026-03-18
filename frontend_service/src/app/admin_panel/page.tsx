@@ -20,7 +20,7 @@ interface FormDataType {
   fileUpload: string;
   imagePublicId: string;
 }
-const admin_panel = () => {
+const AdminPanel = () => {
 
   const [showAddItemFields, setShowAddItemFields] = useState<boolean>(false);
   const [showAddCategoryFields, setShowAddCategoryFields] = useState<boolean>(false);
@@ -55,7 +55,6 @@ const admin_panel = () => {
   };
 
   const handleFormData = (e: any) => {
-    e.preventDefault();
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
@@ -63,9 +62,9 @@ const admin_panel = () => {
     e.preventDefault();
     const obj = {
       name: formData.productName,
-      price: formData.price,
+      price: Number(formData.price),
       sku: formData.sku,
-      stock_quantity: formData.stockQuantity,
+      stock_quantity: Number(formData.stockQuantity),
       description: formData.description,
       category_id: formData.category,
       brand_id: formData.brand,
@@ -83,21 +82,24 @@ const admin_panel = () => {
       } else {
         setLoading((prev) => ({ ...prev, fullPage: false }));
         setImageThumbnail("");
+        setSelectedCategoryAndBrand({ category: "", brand: "" });
         setFormData({
           productName: "",
           price: 0,
           sku: 0,
           stockQuantity: 0,
           description: "",
-          category: "category",
-          brand: "brand",
+          category: "",
+          brand: "",
           fileUpload: "",
           imagePublicId: ""
-        })
+        });
+        setShowAddItemFields(false);
         alert(result.message);
       }
     } catch (err) {
       console.log("An error has occured", err);
+      setLoading((prev) => ({ ...prev, fullPage: false }));
     };
 
   };
@@ -179,14 +181,16 @@ const admin_panel = () => {
   };
 
   return (
-    <>
+    <div className={styles.pageContainer}>
       {loading.fullPage && <FullPageSpinner />}
-      <h1 className={styles.header}>Admin panel</h1>
-      <h1 className={styles.header}>Welcome to the control room, Mr. President!</h1>
-      <button className={styles.addBtn} onClick={() => setShowAddItemFields(true)}>Add new item</button>
-      <button className={styles.addBtn} onClick={() => setShowAddCategoryFields(true)}>Add new category</button>
-      <button className={styles.addBtn} onClick={() => setShowAddBrandFields(true)}>Add new brand</button>
-      {showAddItemFields && <>
+      <h1 className={styles.pageTitle}>Admin Panel</h1>
+      <p className={styles.subtitle}>Welcome to the control room, Mr. President!</p>
+      <div className={styles.actionButtons}>
+        <button className={styles.addBtn} onClick={() => setShowAddItemFields(true)}>Add new item</button>
+        <button className={styles.addBtn} onClick={() => setShowAddCategoryFields(true)}>Add new category</button>
+        <button className={styles.addBtn} onClick={() => setShowAddBrandFields(true)}>Add new brand</button>
+      </div>
+      {showAddItemFields && <div className={styles.formSection}>
         <form onSubmit={handleSubmit}>
           <div className={styles.centerDiv}>
             <div className="space-y-12">
@@ -383,11 +387,14 @@ const admin_panel = () => {
               </div>
             </div>
           </div>
-          <button type="submit" className={styles.addBtn}>Submit</button>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.addBtn}>Submit</button>
+            <button type="button" className={styles.cancelBtn} onClick={() => setShowAddItemFields(false)}>Cancel</button>
+          </div>
         </form>
-      </>}
+      </div>}
 
-      {showAddCategoryFields && <>
+      {showAddCategoryFields && <div className={styles.formSection}>
         <form onSubmit={handleCategorySubmit}>
           <div className={styles.centerDiv}>
             <div className="space-y-12">
@@ -431,11 +438,14 @@ const admin_panel = () => {
               </div>
             </div>
           </div>
-          <button type="submit" className={styles.addBtn}>Submit</button>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.addBtn}>Submit</button>
+            <button type="button" className={styles.cancelBtn} onClick={() => setShowAddCategoryFields(false)}>Cancel</button>
+          </div>
         </form>
-      </>}
+      </div>}
 
-      {showAddBrandFields && <>
+      {showAddBrandFields && <div className={styles.formSection}>
         <form onSubmit={handleBrandSubmit}>
           <div className={styles.centerDiv}>
             <div className="space-y-12">
@@ -479,12 +489,15 @@ const admin_panel = () => {
               </div>
             </div>
           </div>
-          <button type="submit" className={styles.addBtn}>Submit</button>
+          <div className={styles.formActions}>
+            <button type="submit" className={styles.addBtn}>Submit</button>
+            <button type="button" className={styles.cancelBtn} onClick={() => setShowAddBrandFields(false)}>Cancel</button>
+          </div>
         </form>
-      </>}
-    </>
+      </div>}
+    </div>
   )
 };
 
-export default admin_panel;
+export default AdminPanel;
 
