@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/hooks/useAuth';
 import { LogoutButton } from './buttons/LogoutButton';
+import GoToCartBtn from './buttons/GoToCartBtn';
 import Link from 'next/link';
 
 export function Header() {
@@ -22,6 +23,7 @@ export function Header() {
               <p className="text-gray-300">Welcome,</p>
               <p className="font-semibold">{user.firstName} {user.lastName}</p>
             </div>
+            <GoToCartBtn />
             <Link
               href="/profile"
               className="px-4 py-2 border border-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors"

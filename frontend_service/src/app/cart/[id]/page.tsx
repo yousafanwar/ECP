@@ -194,7 +194,7 @@ const Cart = () => {
             <span>${priceTotal + 30}</span>
           </div>
           <button className={styles.checkoutBtn} onClick={checkOut}>Proceed to Checkout</button>
-          <button onClick={() => { router.push('/') }}>Continue Shopping</button>
+          <button onClick={() => { router.push('/') }} className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors">Continue Shopping</button>
         </div>
       </div>
     </div>

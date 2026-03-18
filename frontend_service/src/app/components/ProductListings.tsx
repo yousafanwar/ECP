@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import AddProductBtn from "./buttons/AddProductBtn";
-import GoToCartBtn from "./buttons/GoToCartBtn";
 import ProductCard from "./ProductCard";
 import { ProductItem } from "../interfaces";
 
@@ -69,11 +67,6 @@ export default function ProductListings({ products }: ProductListingsProps) {
   return (
     <>
       <div className="mb-6 space-y-4">
-        <div className="flex gap-3 flex-wrap">
-          <AddProductBtn />
-          <GoToCartBtn />
-        </div>
-
         <div className="flex justify-center">
           <input
             type="text"

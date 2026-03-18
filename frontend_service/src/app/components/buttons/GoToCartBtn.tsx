@@ -78,7 +78,7 @@ const GoToCartBtn = () => {
     return (
         <>
             <button className="relative cursor-pointer" onClick={navigateToCart}>
-                <ShoppingCartIcon className="h-8 w-8 text-gray-800 hover:text-gray-600" />
+                <ShoppingCartIcon className="h-8 w-8 text-white hover:text-gray-300" />
                 <span className="
           absolute -top-1 -right-1 
           bg-red-600 text-white 
