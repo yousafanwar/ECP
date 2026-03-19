@@ -5,6 +5,8 @@ create table if not exists users(
 	last_name VARCHAR(255) not null, 
 	email VARCHAR(255) unique not null, 
 	password VARCHAR(255) not null, 
+	phone VARCHAR(20), 
+	is_admin boolean default false, 
 	is_deleted boolean default false, 
 	created_at timestamp default CURRENT_TIMESTAMP, 
 	updated_at timestamp default CURRENT_TIMESTAMP 

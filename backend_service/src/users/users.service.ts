@@ -18,7 +18,7 @@ export class UsersService {
     };
 
     async getUserById(userId: string): Promise<FetchUserById> {
-        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, email, is_deleted, is_guest, created_at, updated_at FROM public.users where user_id = $1;', [userId]);
+        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, email, phone, is_admin, is_deleted, is_guest, created_at, updated_at FROM public.users where user_id = $1;', [userId]);
         if (response.rows.length === 0) {
             throw new NotFoundException(`No user found with the id: ${userId}`);
         }
@@ -26,7 +26,7 @@ export class UsersService {
     }
 
     async getUserByEmail(email: string): Promise<FetchUserByEmail> {
-        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, "password", is_deleted, created_at, updated_at FROM public.users where email=$1;', [email]);
+        let response = await this.pool.dbPool().query('SELECT user_id, first_name, last_name, "password", phone, is_admin, is_deleted, created_at, updated_at FROM public.users where email=$1;', [email]);
         if (response.rows.length === 0) {
             throw new NotFoundException(`No user found with the email: ${email}`);
         }

@@ -1,5 +1,5 @@
 import { ParseUUIDPipe } from '@nestjs/common';
-import { IsNotEmpty, IsString, MaxLength, IsBoolean, IsEmail, IsStrongPassword, IsUUID, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength, IsBoolean, IsEmail, IsStrongPassword, IsUUID, IsEnum } from 'class-validator';
 
 export class createNewUserDTO {
     @IsNotEmpty()
@@ -19,6 +19,11 @@ export class createNewUserDTO {
     @IsNotEmpty()
     @IsStrongPassword()
     password: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(20)
+    phone?: string;
 
 }
 

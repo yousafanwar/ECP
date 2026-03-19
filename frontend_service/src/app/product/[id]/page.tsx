@@ -114,8 +114,8 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
                 ))}
               </div>
             )}
-            <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
-            <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
+            {/* <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
+            <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} /> */}
           </div>
           <div className={styles.detailsSection}>
             <h1 className={styles.productTitle}>{result.product_title}</h1>
