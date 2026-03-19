@@ -5,6 +5,7 @@ interface User {
   firstName: string;
   lastName: string;
   email?: string;
+  isAdmin?: boolean;
 }
 
 interface AuthState {
@@ -15,6 +16,7 @@ interface AuthState {
   guestId: string | null;
   isLoading: boolean;
   error: string | null;
+  isInitialized: boolean;
 }
 
 const initialState: AuthState = {
@@ -25,6 +27,7 @@ const initialState: AuthState = {
   guestId: null,
   isLoading: false,
   error: null,
+  isInitialized: false,
 };
 
 const authSlice = createSlice({
@@ -46,6 +49,7 @@ const authSlice = createSlice({
       state.isGuest = false;
       state.guestId = null;
       state.error = null;
+      state.isInitialized = true;
     },
 
     // Set guest session
@@ -105,6 +109,11 @@ const authSlice = createSlice({
         state.accessToken = action.payload.accessToken;
         state.isAuthenticated = true;
       }
+      state.isInitialized = true;
+    },
+
+    markInitialized: (state) => {
+      state.isInitialized = true;
     },
   },
 });
@@ -116,6 +125,7 @@ export const {
   setLoading,
   setError,
   restoreAuth,
+  markInitialized,
   setGuestSession,
   clearGuestSession,
 } = authSlice.actions;

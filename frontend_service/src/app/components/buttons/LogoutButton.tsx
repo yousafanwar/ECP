@@ -26,6 +26,7 @@ export function LogoutButton() {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('firstName');
         localStorage.removeItem('lastName');
+        localStorage.removeItem('isAdmin');
         // refreshToken is in httpOnly cookie, no need to clear from localStorage
       }
 
@@ -41,6 +42,7 @@ export function LogoutButton() {
         localStorage.removeItem('userEmail');
         localStorage.removeItem('firstName');
         localStorage.removeItem('lastName');
+        localStorage.removeItem('isAdmin');
       }
       router.push('/login');
     }

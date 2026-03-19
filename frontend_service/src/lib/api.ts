@@ -76,6 +76,7 @@ const refreshAccessToken = async (): Promise<string | null> => {
       localStorage.removeItem("userEmail");
       localStorage.removeItem("firstName");
       localStorage.removeItem("lastName");
+      localStorage.removeItem("isAdmin");
     }
     return null;
   }

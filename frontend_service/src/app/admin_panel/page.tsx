@@ -1,6 +1,7 @@
 'use client'
 import { useState } from "react";
 import styles from "./admin.module.css";
+import { AdminRoute } from "@/app/components/ProtectedRoute";
 import AddProductPanel from "./panels/AddProductPanel";
 import EditProductPanel from "./panels/EditProductPanel";
 import AddImagesPanel from "./panels/AddImagesPanel";
@@ -115,5 +116,11 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel;
+const AdminPanelPage = () => (
+  <AdminRoute>
+    <AdminPanel />
+  </AdminRoute>
+);
+
+export default AdminPanelPage;
 

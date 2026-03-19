@@ -13,18 +13,17 @@ const GoToCartBtn = () => {
     const router = useRouter();
     const selector = useSelector((state: any) => state.cartStore.count);
     const dispatch = useDispatch();
-    const { user } = useAuth();
+    const { user, isGuest, guestId } = useAuth();
+
+    // Resolve the effective user ID — registered user or guest
+    const effectiveUserId = user?.userId ?? (isGuest ? guestId : null);
 
     useEffect(() => {
         const getCart = async () => {
-            // Only fetch if user is available
-            if (!user?.userId) {
-                console.log('Waiting for user to load...');
-                return;
-            }
+            if (!effectiveUserId) return;
 
             try {
-                const result = await apiGet(`/cart/user/${user.userId}`);
+                const result = await apiGet(`/cart/user/${effectiveUserId}`);
                 if (result?.ok) {
                     const data = await result.json();
                     if (data?.payload?.cart_id) {
@@ -41,11 +40,10 @@ const GoToCartBtn = () => {
         const cartFromStorage = localStorage.getItem('cartId');
         if (cartFromStorage) {
             setCartId(cartFromStorage);
-        } else if (user?.userId) {
-            // Only fetch if user is available
+        } else if (effectiveUserId) {
             getCart();
         }
-    }, [user?.userId]); // Re-run when userId changes
+    }, [effectiveUserId]);
 
     useEffect(() => {
         const getStoreCount = async () => {

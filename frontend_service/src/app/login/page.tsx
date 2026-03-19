@@ -60,6 +60,7 @@ export default function LoginPage() {
                     firstName: result.firstName,
                     lastName: result.lastName,
                     email: email,
+                    isAdmin: result.isAdmin ?? false,
                 },
                 accessToken: result.access_token,
             }));
@@ -70,6 +71,7 @@ export default function LoginPage() {
             localStorage.setItem('userEmail', email);
             localStorage.setItem('firstName', result.firstName);
             localStorage.setItem('lastName', result.lastName);
+            localStorage.setItem('isAdmin', String(result.isAdmin ?? false));
 
             setSuccess(SUCCESS_MESSAGES.LOGIN_SUCCESS);
 

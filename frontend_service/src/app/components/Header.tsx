@@ -37,6 +37,7 @@ export function Header() {
         {!isAuthenticated && isGuest && (
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-400">Guest</span>
+            <GoToCartBtn />
             <Link
               href="/login"
               className="px-4 py-2 bg-white text-gray-800 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors"

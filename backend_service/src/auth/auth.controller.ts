@@ -37,6 +37,7 @@ export class AuthController {
       firstName: result.firstName,
       lastName: result.lastName,
       email: body.email,
+      isAdmin: result.isAdmin,
       access_token: result.access_token,
     });
   }

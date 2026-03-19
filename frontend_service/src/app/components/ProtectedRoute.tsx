@@ -17,16 +17,50 @@ export function ProtectedRoute({
 }: ProtectedRouteProps) {
   const router = useRouter();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isInitialized = useSelector((state: RootState) => state.auth.isInitialized);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if authenticated
+    if (!isInitialized) return;
     if (!isAuthenticated) {
       router.push(redirectTo);
     } else {
       setIsLoading(false);
     }
-  }, [isAuthenticated, router, redirectTo]);
+  }, [isInitialized, isAuthenticated, router, redirectTo]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="mb-4 h-8 w-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
+
+export function AdminRoute({
+  children,
+  redirectTo = '/',
+}: ProtectedRouteProps) {
+  const router = useRouter();
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+  const isInitialized = useSelector((state: RootState) => state.auth.isInitialized);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (!isAuthenticated || !user?.isAdmin) {
+      router.push(redirectTo);
+    } else {
+      setIsLoading(false);
+    }
+  }, [isInitialized, isAuthenticated, user, router, redirectTo]);
 
   if (isLoading) {
     return (

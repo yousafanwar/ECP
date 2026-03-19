@@ -40,6 +40,7 @@ export class AuthService {
             userId: user.user_id,
             firstName: user.first_name,
             lastName: user.last_name,
+            isAdmin: user.is_admin,
             access_token: accessToken,
             refresh_token: refreshToken,
         };
