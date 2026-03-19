@@ -47,6 +47,40 @@ export default function OrderListPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const filteredOrders = orders.filter(o => {
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const fullName = `${o.first_name} ${o.last_name}`.toLowerCase();
+      if (!fullName.includes(q) && !o.email.toLowerCase().includes(q) && !o.order_id.toLowerCase().includes(q)) return false;
+    }
+    if (statusFilter.length > 0 && !statusFilter.includes(o.status)) return false;
+    if (dateFrom && new Date(o.created_at) < new Date(dateFrom)) return false;
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      if (new Date(o.created_at) > to) return false;
+    }
+    return true;
+  });
+
+  const toggleStatusFilter = (s: string) =>
+    setStatusFilter(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter([]);
+    setDateFrom("");
+    setDateTo("");
+  };
+
+  const hasActiveFilters = searchTerm || statusFilter.length > 0 || dateFrom || dateTo;
+
   // View modal state
   const [viewOrder, setViewOrder] = useState<OrderDetail | null>(null);
   const [viewOrderId, setViewOrderId] = useState<string | null>(null);
@@ -142,12 +176,81 @@ export default function OrderListPanel() {
     <>
       <h2 className={styles.panelTitle}>Orders</h2>
 
+      {/* Filter Bar */}
+      <div className="mb-4 space-y-3">
+        <div className="flex flex-wrap gap-3">
+          {/* Search */}
+          <input
+            type="text"
+            placeholder="Search by name, email or order ID…"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="flex-1 min-w-[200px] bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400"
+          />
+
+          {/* Date From */}
+          <div className="flex items-center gap-2">
+            <label className="text-gray-400 text-xs whitespace-nowrap">From</label>
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            />
+          </div>
+
+          {/* Date To */}
+          <div className="flex items-center gap-2">
+            <label className="text-gray-400 text-xs whitespace-nowrap">To</label>
+            <input
+              type="date"
+              value={dateTo}
+              onChange={e => setDateTo(e.target.value)}
+              className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            />
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="text-xs px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors whitespace-nowrap"
+            >
+              ✕ Clear filters
+            </button>
+          )}
+        </div>
+
+        {/* Status pills */}
+        <div className="flex flex-wrap gap-2">
+          {ALL_STATUSES.map(s => (
+            <button
+              key={s}
+              onClick={() => toggleStatusFilter(s)}
+              className={`text-xs px-3 py-1 rounded-full font-semibold border transition-all ${
+                statusFilter.includes(s)
+                  ? `${STATUS_COLORS[s]} text-white border-transparent`
+                  : 'bg-transparent text-gray-400 border-gray-600 hover:border-gray-400'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+
+        {/* Results count */}
+        <p className="text-gray-500 text-xs">
+          {filteredOrders.length} of {orders.length} order{orders.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
       {loading ? (
         <p className="text-gray-400 text-sm">Loading orders...</p>
       ) : error ? (
         <p className="text-red-400 text-sm">{error}</p>
       ) : orders.length === 0 ? (
         <p className="text-gray-400 text-sm">No orders found.</p>
+      ) : filteredOrders.length === 0 ? (
+        <p className="text-gray-400 text-sm">No orders match the current filters.</p>
       ) : (
         <div className={styles.tableWrapper}>
           <table className={styles.table}>
@@ -164,7 +267,7 @@ export default function OrderListPanel() {
               </tr>
             </thead>
             <tbody>
-              {orders.map(o => (
+              {filteredOrders.map(o => (
                 <tr key={o.order_id} className={styles.tr}>
                   <td className={styles.td}>
                     <span className="font-mono text-xs text-gray-400" title={o.order_id}>
