@@ -1,502 +1,118 @@
 'use client'
 import { useState } from "react";
-import { PhotoIcon } from '@heroicons/react/24/solid'
 import styles from "./admin.module.css";
-import { CldUploadButton } from 'next-cloudinary';
-import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
-import { Spinner, FullPageSpinner } from "../components/LoadingSpinners";
-import { apiPost, apiGet } from "@/lib/api";
+import AddProductPanel from "./panels/AddProductPanel";
+import EditProductPanel from "./panels/EditProductPanel";
+import AddImagesPanel from "./panels/AddImagesPanel";
+import AddCategoryPanel from "./panels/AddCategoryPanel";
+import AddBrandPanel from "./panels/AddBrandPanel";
+import UserListPanel from "./panels/UserListPanel";
 
-type UUID = string;
-interface FormDataType {
-  productName: string;
-  price: number;
-  sku: number;
-  stockQuantity: number;
-  description: string;
-  category: UUID | null;
-  brand: UUID | null;
-  fileUpload: string;
-  imagePublicId: string;
-}
+type View =
+  | "products.add"
+  | "products.edit"
+  | "products.images"
+  | "categories.add"
+  | "brands.add"
+  | "users.list";
+
+const NAV = [
+  {
+    section: "Products",
+    items: [
+      { label: "Add Product", view: "products.add" as View },
+      { label: "Edit Product", view: "products.edit" as View },
+      { label: "Add Images", view: "products.images" as View },
+    ],
+  },
+  {
+    section: "Categories",
+    items: [{ label: "Add Category", view: "categories.add" as View }],
+  },
+  {
+    section: "Brands",
+    items: [{ label: "Add Brand", view: "brands.add" as View }],
+  },
+  {
+    section: "Users",
+    items: [{ label: "View Users", view: "users.list" as View }],
+  },
+];
+
 const AdminPanel = () => {
+  const [activeView, setActiveView] = useState<View | null>(null);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(
+    Object.fromEntries(NAV.map(n => [n.section, false]))
+  );
 
-  const [showAddItemFields, setShowAddItemFields] = useState<boolean>(false);
-  const [showAddCategoryFields, setShowAddCategoryFields] = useState<boolean>(false);
-  const [showAddBrandFields, setShowAddBrandFields] = useState<boolean>(false);
-  const [imageThumbnail, setImageThumbnail] = useState<string>("");
-  const [categories, setCategories] = useState<Array<{ category_id: string, name: string }>>([]);
-  const [brands, setBrands] = useState<Array<{ brand_id: number, name: string, description: string }>>([]);
-  const [selectedCategoryAndBrand, setSelectedCategoryAndBrand] = useState<{ category: string, brand: string }>({ category: "", brand: "" });
-  const [loading, setLoading] = useState<{ fullPage: boolean, category: boolean, brand: boolean }>({ fullPage: false, category: false, brand: false });
-  const [formData, setFormData] = useState<FormDataType>({
-    productName: "",
-    price: 0,
-    sku: 0,
-    stockQuantity: 0,
-    description: "",
-    category: "",
-    brand: "",
-    fileUpload: "",
-    imagePublicId: ""
-  });
-  const [categoryFormData, setCategoryFormData] = useState<{ name: string, description: string }>({ name: "", description: "" });
-  const [brandFormData, setBrandFormData] = useState<{ name: string, description: string }>({ name: "", description: "" });
+  const toggleSection = (section: string) =>
+    setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
 
-  const handleFileUpload = (e: any) => {
-    const publicId = e.info.public_id;
-    const imageUrl = e.info.secure_url;
-    const thumbnail = e.info.thumbnail_url;
-    setFormData((prev) => ({ ...prev, fileUpload: imageUrl, imagePublicId: publicId }));
-    setImageThumbnail(thumbnail);
-
-    console.log("Upload successful! Public ID:", publicId, "Image URL:", imageUrl);
-  };
-
-  const handleFormData = (e: any) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  }
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const obj = {
-      name: formData.productName,
-      price: Number(formData.price),
-      sku: formData.sku,
-      stock_quantity: Number(formData.stockQuantity),
-      description: formData.description,
-      category_id: formData.category,
-      brand_id: formData.brand,
-      image_url: formData.fileUpload,
-      imagePublicId: formData.imagePublicId
-    };
-
-    try {
-      setLoading((prev) => ({ ...prev, fullPage: true }));
-      const response = await apiPost(`/product`, obj);
-      const result = await response.json();
-      if (!response.ok) {
-        alert(`Error while adding product: ${result.message}`);
-        throw new Error('request failed');
-      } else {
-        setLoading((prev) => ({ ...prev, fullPage: false }));
-        setImageThumbnail("");
-        setSelectedCategoryAndBrand({ category: "", brand: "" });
-        setFormData({
-          productName: "",
-          price: 0,
-          sku: 0,
-          stockQuantity: 0,
-          description: "",
-          category: "",
-          brand: "",
-          fileUpload: "",
-          imagePublicId: ""
-        });
-        setShowAddItemFields(false);
-        alert(result.message);
-      }
-    } catch (err) {
-      console.log("An error has occured", err);
-      setLoading((prev) => ({ ...prev, fullPage: false }));
-    };
-
-  };
-
-  const fetchCategories = async () => {
-    try {
-      setLoading((prev) => ({ ...prev, category: true }));
-      const response = await apiGet('/categories');
-      const result = await response.json();
-      setLoading((prev) => ({ ...prev, category: false }));
-      setCategories(result.payload);
-    } catch (err) {
-      console.error(err);
-    };
-  }
-
-  const fetchBrands = async () => {
-    try {
-      setLoading((prev) => ({ ...prev, brand: true }));
-      const response = await apiGet('/brands');
-      const result = await response.json();
-      setLoading((prev) => ({ ...prev, brand: false }));
-      setBrands(result.payload);
-    } catch (err) {
-      console.error(err);
-    };
-  }
-
-  const handleCategorySubmit = async (e: any) => {
-    e.preventDefault();
-    const obj = {
-      name: categoryFormData.name,
-      description: categoryFormData.description
-    };
-
-    try {
-      setLoading((prev) => ({ ...prev, fullPage: true }));
-      const response = await apiPost(`/categories`, obj);
-      const result = await response.json();
-      if (!response.ok) {
-        alert(`Error while adding category: ${result.message}`);
-        throw new Error('request failed');
-      } else {
-        setLoading((prev) => ({ ...prev, fullPage: false }));
-        setCategoryFormData({ name: "", description: "" });
-        setShowAddCategoryFields(false);
-        alert(result.message);
-      }
-    } catch (err) {
-      console.log("An error has occured", err);
-      setLoading((prev) => ({ ...prev, fullPage: false }));
-    }
-  };
-
-  const handleBrandSubmit = async (e: any) => {
-    e.preventDefault();
-    const obj = {
-      name: brandFormData.name,
-      description: brandFormData.description
-    };
-
-    try {
-      setLoading((prev) => ({ ...prev, fullPage: true }));
-      const response = await apiPost(`/brands`, obj);
-      const result = await response.json();
-      if (!response.ok) {
-        alert(`Error while adding brand: ${result.message}`);
-        throw new Error('request failed');
-      } else {
-        setLoading((prev) => ({ ...prev, fullPage: false }));
-        setBrandFormData({ name: "", description: "" });
-        setShowAddBrandFields(false);
-        alert(result.message);
-      }
-    } catch (err) {
-      console.log("An error has occured", err);
-      setLoading((prev) => ({ ...prev, fullPage: false }));
+  const renderPanel = () => {
+    if (!activeView) return (
+      <div className={styles.welcome}>
+        <p className={styles.welcomeText}>Supreme Commander, welcome to the control room.</p>
+      </div>
+    );
+    switch (activeView) {
+      case "products.add":    return <AddProductPanel />;
+      case "products.edit":   return <EditProductPanel />;
+      case "products.images": return <AddImagesPanel />;
+      case "categories.add":  return <AddCategoryPanel />;
+      case "brands.add":      return <AddBrandPanel />;
+      case "users.list":      return <UserListPanel />;
     }
   };
 
   return (
-    <div className={styles.pageContainer}>
-      {loading.fullPage && <FullPageSpinner />}
-      <h1 className={styles.pageTitle}>Admin Panel</h1>
-      <p className={styles.subtitle}>Welcome to the control room, Mr. President!</p>
-      <div className={styles.actionButtons}>
-        <button className={styles.addBtn} onClick={() => setShowAddItemFields(true)}>Add new item</button>
-        <button className={styles.addBtn} onClick={() => setShowAddCategoryFields(true)}>Add new category</button>
-        <button className={styles.addBtn} onClick={() => setShowAddBrandFields(true)}>Add new brand</button>
-      </div>
-      {showAddItemFields && <div className={styles.formSection}>
-        <form onSubmit={handleSubmit}>
-          <div className={styles.centerDiv}>
-            <div className="space-y-12">
-              <div className="border-b border-white/10 pb-12">
-                <h2 className="text-base/7 font-semibold text-white">Add new product</h2>
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div className="sm:col-span-4">
-                    <label htmlFor="productName" className="block text-sm/6 font-medium text-white">
-                      Product name
-                    </label>
-                    <div className="mt-2">
-                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
-                        <input
-                          name="productName"
-                          type="text"
-                          placeholder="Think pad"
-                          value={formData.productName}
-                          onChange={(e) => handleFormData(e)}
-                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
+    <div className={styles.layout}>
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <h1 className={styles.sidebarTitle}>Admin Panel</h1>
+          <p className={styles.sidebarSubtitle}>Control Room</p>
+        </div>
+        <nav className={styles.nav}>
+          {NAV.map(({ section, items }) => {
+            const isOpen = openSections[section];
+            return (
+              <div key={section} className={styles.navSection}>
+                <button
+                  className={styles.accordionTrigger}
+                  onClick={() => toggleSection(section)}
+                >
+                  <span>{section}</span>
+                  <svg
+                    className={`${styles.accordionChevron} ${isOpen ? styles.accordionChevronOpen : ""}`}
+                    viewBox="0 0 20 20" fill="currentColor" width="12" height="12"
+                  >
+                    <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06z" />
+                  </svg>
+                </button>
+                {isOpen && (
+                  <div className={styles.accordionContent}>
+                    {items.map(({ label, view }) => (
+                      <button
+                        key={view}
+                        onClick={() => setActiveView(view)}
+                        className={`${styles.navItem} ${activeView === view ? styles.navItemActive : ""}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
                   </div>
-
-                  <div className="sm:col-span-4">
-                    <label htmlFor="price" className="block text-sm/6 font-medium text-white">
-                      Price
-                    </label>
-                    <div className="mt-2">
-                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
-                        <input
-                          name="price"
-                          type="number"
-                          placeholder="0.00"
-                          value={formData.price}
-                          onChange={(e) => handleFormData(e)}
-                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="sm:col-span-4">
-                    <label htmlFor="sku" className="block text-sm/6 font-medium text-white">
-                      SKU
-                    </label>
-                    <div className="mt-2">
-                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
-                        <input
-                          name="sku"
-                          type="text"
-                          placeholder="123345678"
-                          maxLength={12}
-                          value={formData.sku}
-                          onChange={(e) => handleFormData(e)}
-                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="sm:col-span-4">
-                    <label htmlFor="stockQuantity" className="block text-sm/6 font-medium text-white">
-                      Stock quantity
-                    </label>
-                    <div className="mt-2">
-                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
-                        <input
-                          name="stockQuantity"
-                          type="number"
-                          placeholder="0"
-                          value={formData.stockQuantity}
-                          onChange={(e) => handleFormData(e)}
-                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label htmlFor="description" className="block text-sm/6 font-medium text-white">
-                      Description
-                    </label>
-                    <div className="mt-2">
-                      <textarea
-                        name="description"
-                        rows={3}
-                        value={formData.description}
-                        onChange={(e) => handleFormData(e)}
-                        className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                      />
-                    </div>
-                    <p className="mt-3 text-sm/6 text-gray-400">Write a few sentences about the product.</p>
-                  </div>
-
-                  <div className="sm:col-span-4">
-                    <div className="mt-2">
-                      <Menu as="div" className="relative w-full">
-                        <MenuButton
-                          type="button"
-                          onClick={fetchCategories}
-                          className="flex w-full items-center justify-between rounded-md
-                   bg-white/5 px-3 py-2 text-sm font-semibold text-white
-                   ring-1 ring-white/10 hover:bg-white/20
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                          {selectedCategoryAndBrand.category || "Category"}
-                          <ChevronDownIcon className="size-5 text-gray-400" />
-                          {loading.category && <Spinner />}
-                        </MenuButton>
-
-                        <MenuItems
-                          transition
-                          className="absolute z-10 mt-1 w-full origin-top-right rounded-md
-                   bg-gray-800 ring-1 ring-white/10
-                   transition data-closed:scale-95 data-closed:opacity-0"
-                        >
-                          {categories.map((ele) => (
-                            <MenuItem key={ele.category_id}>
-                              <button
-                                type="button"
-                                onClick={() => { setSelectedCategoryAndBrand((prev) => ({ ...prev, category: ele.name })); setFormData((prev) => ({ ...prev, category: ele.category_id.toString() })) }}
-                                className="block w-full text-left px-4 py-2 text-sm text-gray-300
-                         hover:bg-white/5 hover:text-white"
-                              >
-                                {ele.name}
-                              </button>
-                            </MenuItem>
-                          ))}
-                        </MenuItems>
-                      </Menu>
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-4">
-                    <div className="mt-2">
-                      <Menu as="div" className="relative w-full">
-                        <MenuButton
-                          type="button"
-                          onClick={fetchBrands}
-                          className="flex w-full items-center justify-between rounded-md
-                   bg-white/5 px-3 py-2 text-sm font-semibold text-white
-                   ring-1 ring-white/10 hover:bg-white/20
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        >
-                          {selectedCategoryAndBrand.brand || "Brand"}
-                          <ChevronDownIcon className="size-5 text-gray-400" />
-                          {loading.brand && <Spinner />}
-                        </MenuButton>
-
-                        <MenuItems
-                          transition
-                          className="absolute z-10 mt-1 w-full origin-top-right rounded-md
-                   bg-gray-800 ring-1 ring-white/10
-                   transition data-closed:scale-95 data-closed:opacity-0"
-                        >
-                          {brands.map((ele) => (
-                            <MenuItem key={ele.brand_id}>
-                              <button
-                                type="button"
-                                onClick={() => { setSelectedCategoryAndBrand((prev) => ({ ...prev, brand: ele.name })); setFormData((prev) => ({ ...prev, brand: ele.brand_id.toString() })) }}
-                                className="block w-full text-left px-4 py-2 text-sm text-gray-300
-                         hover:bg-white/5 hover:text-white"
-                              >
-                                {ele.name}
-                              </button>
-                            </MenuItem>
-                          ))}
-                        </MenuItems>
-                      </Menu>
-                    </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label htmlFor="cover-photo" className="block text-sm/6 font-medium text-white">
-                      Add Images
-                    </label>
-                    {imageThumbnail && <img src={imageThumbnail} alt="image" width={50} height={50} />}
-                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-white/25 px-6 py-10">
-                      <div className="text-center">
-                        <PhotoIcon aria-hidden="true" className="mx-auto size-12 text-gray-600" />
-                        <div className="mt-4 flex text-sm/6 text-gray-400">
-                          <label
-                            htmlFor="file-upload"
-                            className="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-400 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-indigo-500 hover:text-indigo-300"
-                          >
-                            <CldUploadButton uploadPreset="ecp_products" onSuccess={(result) => handleFileUpload(result)} />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs/5 text-gray-400">PNG, JPG, GIF up to 10MB</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
-            </div>
-          </div>
-          <div className={styles.formActions}>
-            <button type="submit" className={styles.addBtn}>Submit</button>
-            <button type="button" className={styles.cancelBtn} onClick={() => setShowAddItemFields(false)}>Cancel</button>
-          </div>
-        </form>
-      </div>}
-
-      {showAddCategoryFields && <div className={styles.formSection}>
-        <form onSubmit={handleCategorySubmit}>
-          <div className={styles.centerDiv}>
-            <div className="space-y-12">
-              <div className="border-b border-white/10 pb-12">
-                <h2 className="text-base/7 font-semibold text-white">Add new category</h2>
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div className="sm:col-span-4">
-                    <label htmlFor="categoryName" className="block text-sm/6 font-medium text-white">
-                      Category name
-                    </label>
-                    <div className="mt-2">
-                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
-                        <input
-                          name="categoryName"
-                          type="text"
-                          placeholder="Electronics"
-                          value={categoryFormData.name}
-                          onChange={(e) => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
-                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label htmlFor="categoryDescription" className="block text-sm/6 font-medium text-white">
-                      Description
-                    </label>
-                    <div className="mt-2">
-                      <textarea
-                        name="categoryDescription"
-                        rows={3}
-                        value={categoryFormData.description}
-                        onChange={(e) => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
-                        className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                      />
-                    </div>
-                    <p className="mt-3 text-sm/6 text-gray-400">Write a brief description of the category.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.formActions}>
-            <button type="submit" className={styles.addBtn}>Submit</button>
-            <button type="button" className={styles.cancelBtn} onClick={() => setShowAddCategoryFields(false)}>Cancel</button>
-          </div>
-        </form>
-      </div>}
-
-      {showAddBrandFields && <div className={styles.formSection}>
-        <form onSubmit={handleBrandSubmit}>
-          <div className={styles.centerDiv}>
-            <div className="space-y-12">
-              <div className="border-b border-white/10 pb-12">
-                <h2 className="text-base/7 font-semibold text-white">Add new brand</h2>
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div className="sm:col-span-4">
-                    <label htmlFor="brandName" className="block text-sm/6 font-medium text-white">
-                      Brand name
-                    </label>
-                    <div className="mt-2">
-                      <div className="flex items-center rounded-md bg-white/5 pl-3 outline-1 -outline-offset-1 outline-white/10 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-500">
-                        <input
-                          name="brandName"
-                          type="text"
-                          placeholder="Apple"
-                          value={brandFormData.name}
-                          onChange={(e) => setBrandFormData({ ...brandFormData, name: e.target.value })}
-                          className="block min-w-0 grow bg-transparent py-1.5 pr-3 pl-1 text-base text-white placeholder:text-gray-500 focus:outline-none sm:text-sm/6"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label htmlFor="brandDescription" className="block text-sm/6 font-medium text-white">
-                      Description
-                    </label>
-                    <div className="mt-2">
-                      <textarea
-                        name="brandDescription"
-                        rows={3}
-                        value={brandFormData.description}
-                        onChange={(e) => setBrandFormData({ ...brandFormData, description: e.target.value })}
-                        className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white outline-1 -outline-offset-1 outline-white/10 placeholder:text-gray-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500 sm:text-sm/6"
-                      />
-                    </div>
-                    <p className="mt-3 text-sm/6 text-gray-400">Write a brief description of the brand.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className={styles.formActions}>
-            <button type="submit" className={styles.addBtn}>Submit</button>
-            <button type="button" className={styles.cancelBtn} onClick={() => setShowAddBrandFields(false)}>Cancel</button>
-          </div>
-        </form>
-      </div>}
+            );
+          })}
+        </nav>
+      </aside>
+      <main className={styles.content}>
+        <div className={styles.contentInner}>
+          {renderPanel()}
+        </div>
+      </main>
     </div>
-  )
+  );
 };
 
 export default AdminPanel;
