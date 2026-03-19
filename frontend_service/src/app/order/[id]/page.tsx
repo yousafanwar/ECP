@@ -139,7 +139,16 @@ const Order = () => {
     }
   }
 
-  const isFinalized = orderStatus === 'confirmed' || orderStatus === 'paid';
+  const isFinalized = orderStatus !== null && orderStatus !== 'pending';
+
+  const STATUS_INFO: Record<string, { icon: string; message: string; colorClasses: string }> = {
+    confirmed: { icon: '✓', message: 'Order confirmed — awaiting payment',       colorClasses: 'text-green-700 bg-green-50 border-green-200' },
+    paid:      { icon: '✓', message: 'Payment received — preparing your order',  colorClasses: 'text-blue-700 bg-blue-50 border-blue-200' },
+    shipped:   { icon: '🚚', message: 'Your order is on its way!',               colorClasses: 'text-sky-700 bg-sky-50 border-sky-200' },
+    delivered: { icon: '✓', message: 'Order delivered successfully',             colorClasses: 'text-emerald-700 bg-emerald-50 border-emerald-200' },
+    cancelled: { icon: '✗', message: 'This order has been cancelled',            colorClasses: 'text-red-700 bg-red-50 border-red-200' },
+  };
+  const statusInfo = STATUS_INFO[orderStatus ?? ''] ?? { icon: 'ℹ️', message: orderStatus ?? '', colorClasses: 'text-gray-700 bg-gray-50 border-gray-200' };
 
   return (
     <div className="min-h-screen bg-black text-white py-8 px-4">
@@ -151,8 +160,8 @@ const Order = () => {
         {isFinalized ? (
           <div className="max-w-lg mx-auto">
             <div className="bg-white text-black rounded-lg p-6">
-              <div className="mb-4 py-3 text-center text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg">
-                {orderStatus === 'confirmed' ? '✓ Order confirmed — awaiting delivery' : '✓ Payment received'}
+              <div className={`mb-4 py-3 text-center text-sm font-medium border rounded-lg ${statusInfo.colorClasses}`}>
+                {statusInfo.icon} {statusInfo.message}
               </div>
 
               <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
@@ -394,28 +403,22 @@ const Order = () => {
                 </div>
               </div>
 
-              {orderStatus === 'confirmed' ? (
-                <div className="mt-6 py-3 text-center text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-lg">
-                  ✓ Order confirmed
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={handlePlaceOrder}
-                    disabled={isLoading || !savedAddress || !selectedPaymentMethod}
-                    className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  >
-                    {!savedAddress ? 'Add Address First' : !selectedPaymentMethod ? 'Select Payment Method' : isLoading ? 'Processing...' : 'Proceed to Pay'}
-                  </button>
+              <>
+                <button
+                  onClick={handlePlaceOrder}
+                  disabled={isLoading || !savedAddress || !selectedPaymentMethod}
+                  className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {!savedAddress ? 'Add Address First' : !selectedPaymentMethod ? 'Select Payment Method' : isLoading ? 'Processing...' : 'Proceed to Pay'}
+                </button>
 
-                  <button
-                    onClick={backToCart}
-                    className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors"
-                  >
-                    Back to Cart
-                  </button>
-                </>
-              )}
+                <button
+                  onClick={backToCart}
+                  className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors"
+                >
+                  Back to Cart
+                </button>
+              </>
             </div>
           </div>
         </div>
