@@ -204,6 +204,21 @@ export class OrdersService {
         return res.rows;
     }
 
+    async getAllOrders() {
+        const res = await this.pool.dbPool().query(
+            `SELECT o.order_id, o.status, o.created_at,
+                    u.first_name, u.last_name, u.email,
+                    COALESCE(SUM(oi.price * oi.quantity), 0) AS total,
+                    COUNT(oi.order_item_id) AS item_count
+             FROM orders o
+             LEFT JOIN order_items oi ON oi.order_id = o.order_id
+             LEFT JOIN users u ON u.user_id = o.user_id
+             GROUP BY o.order_id, u.first_name, u.last_name, u.email
+             ORDER BY o.created_at DESC;`
+        );
+        return res.rows;
+    }
+
     async deleteOrder(orderId: string) {
         const client = await this.pool.dbPool().connect();
         try {

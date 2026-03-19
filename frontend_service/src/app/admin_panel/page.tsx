@@ -8,6 +8,7 @@ import AddImagesPanel from "./panels/AddImagesPanel";
 import AddCategoryPanel from "./panels/AddCategoryPanel";
 import AddBrandPanel from "./panels/AddBrandPanel";
 import UserListPanel from "./panels/UserListPanel";
+import OrderListPanel from "./panels/OrderListPanel";
 
 type View =
   | "products.add"
@@ -15,7 +16,8 @@ type View =
   | "products.images"
   | "categories.add"
   | "brands.add"
-  | "users.list";
+  | "users.list"
+  | "orders.list";
 
 const NAV = [
   {
@@ -37,6 +39,10 @@ const NAV = [
   {
     section: "Users",
     items: [{ label: "View Users", view: "users.list" as View }],
+  },
+  {
+    section: "Orders",
+    items: [{ label: "View Orders", view: "orders.list" as View }],
   },
 ];
 
@@ -61,8 +67,7 @@ const AdminPanel = () => {
       case "products.images": return <AddImagesPanel />;
       case "categories.add":  return <AddCategoryPanel />;
       case "brands.add":      return <AddBrandPanel />;
-      case "users.list":      return <UserListPanel />;
-    }
+      case "users.list":      return <UserListPanel />;      case "orders.list":   return <OrderListPanel />;    }
   };
 
   return (
