@@ -1,4 +1,4 @@
-import { Post, Controller, Param, ParseUUIDPipe, Get, InternalServerErrorException, Delete } from "@nestjs/common";
+import { Post, Body, Controller, Param, ParseUUIDPipe, Get, InternalServerErrorException, Delete, Patch } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 import { ApiResponse } from "src/common";
 
@@ -40,5 +40,14 @@ export class OrderController {
     async deleteOrderById(@Param('orderId', ParseUUIDPipe) orderId: string): Promise<ApiResponse> {
         const response = this.ordersService.deleteOrder(orderId);
         return new ApiResponse(true, 'Order deleted successfully', response);
+    }
+
+    @Patch(':orderId/status')
+    async updateOrderStatus(
+        @Param('orderId', ParseUUIDPipe) orderId: string,
+        @Body() body: { status: string },
+    ): Promise<ApiResponse> {
+        await this.ordersService.updateOrderStatus(orderId, body.status);
+        return new ApiResponse(true, 'Order status updated successfully', null);
     }
 }

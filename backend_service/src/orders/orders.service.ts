@@ -219,6 +219,20 @@ export class OrdersService {
         return res.rows;
     }
 
+    async updateOrderStatus(orderId: string, status: string): Promise<void> {
+        const validStatuses = ['pending', 'paid', 'shipped', 'delivered', 'cancelled', 'confirmed'];
+        if (!validStatuses.includes(status)) {
+            throw new Error('Invalid order status');
+        }
+        const res = await this.pool.dbPool().query(
+            `UPDATE orders SET status = $1 WHERE order_id = $2`,
+            [status, orderId]
+        );
+        if (res.rowCount === 0) {
+            throw new NotFoundException('Order not found');
+        }
+    }
+
     async deleteOrder(orderId: string) {
         const client = await this.pool.dbPool().connect();
         try {
@@ -233,6 +247,7 @@ export class OrdersService {
                 [orderId]
             );
 
+            await client.query(`DELETE FROM public.payments WHERE order_id=$1;`, [orderId]);
             await client.query(`DELETE FROM public.order_items WHERE order_id=$1;`, [orderId]);
             const orderRes = await client.query(`DELETE FROM public.orders WHERE order_id=$1;`, [orderId]);
             if (orderRes.rowCount === 0) {
