@@ -8,10 +8,10 @@ import { Spinner, FullPageSpinner } from "../../components/LoadingSpinners";
 import { apiPost, apiGet } from "@/lib/api";
 import styles from "../admin.module.css";
 
-const inputCls = "block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 outline outline-1 outline-white/10 focus:outline-2 focus:outline-indigo-500";
-const menuBtnCls = "flex w-full items-center justify-between rounded-md bg-white/5 px-3 py-2 text-sm text-white ring-1 ring-white/10 hover:bg-white/10";
-const menuItemsCls = "absolute z-10 mt-1 w-full rounded-md bg-gray-800 ring-1 ring-white/10 max-h-60 overflow-y-auto";
-const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white";
+const inputCls = "block w-full rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 outline outline-1 outline-gray-200 focus:outline-2 focus:outline-indigo-500";
+const menuBtnCls = "flex w-full items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
+const menuItemsCls = "absolute z-10 mt-1 w-full rounded-md bg-white ring-1 ring-gray-200 max-h-60 overflow-y-auto shadow-lg";
+const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900";
 
 interface FormData {
   productName: string;
@@ -97,7 +97,7 @@ export default function AddProductPanel() {
         <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-6">
 
           <div className="sm:col-span-4">
-            <label className="block text-sm font-medium text-white mb-1">Product name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product name</label>
             <input name="productName" type="text" placeholder="ThinkPad"
               value={formData.productName}
               onChange={e => setFormData(prev => ({ ...prev, productName: e.target.value }))}
@@ -106,7 +106,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-white mb-1">Price ($)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
             <input name="price" type="number" min="0" step="0.01" placeholder="0.00"
               value={formData.price}
               onChange={e => setFormData(prev => ({ ...prev, price: e.target.value as any }))}
@@ -115,7 +115,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="sm:col-span-3">
-            <label className="block text-sm font-medium text-white mb-1">SKU</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
             <input name="sku" type="text" placeholder="123456789" maxLength={12}
               value={formData.sku}
               onChange={e => setFormData(prev => ({ ...prev, sku: e.target.value as any }))}
@@ -124,7 +124,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="sm:col-span-3">
-            <label className="block text-sm font-medium text-white mb-1">Stock quantity</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Stock quantity</label>
             <input name="stockQuantity" type="number" min="0" placeholder="0"
               value={formData.stockQuantity}
               onChange={e => setFormData(prev => ({ ...prev, stockQuantity: e.target.value as any }))}
@@ -133,7 +133,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="col-span-full">
-            <label className="block text-sm font-medium text-white mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea name="description" rows={3} placeholder="Describe the product..."
               value={formData.description}
               onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
@@ -142,7 +142,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="sm:col-span-3">
-            <label className="block text-sm font-medium text-white mb-1">Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <Menu as="div" className="relative w-full">
               <MenuButton type="button" onClick={fetchCategories} className={menuBtnCls}>
                 {selectedLabels.category || "Select category"}
@@ -164,7 +164,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="sm:col-span-3">
-            <label className="block text-sm font-medium text-white mb-1">Brand</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
             <Menu as="div" className="relative w-full">
               <MenuButton type="button" onClick={fetchBrands} className={menuBtnCls}>
                 {selectedLabels.brand || "Select brand"}
@@ -186,11 +186,11 @@ export default function AddProductPanel() {
           </div>
 
           <div className="col-span-full">
-            <label className="block text-sm font-medium text-white mb-1">Hero Image</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Hero Image</label>
             {imageThumbnail && (
               <img src={imageThumbnail} alt="thumbnail" width={64} height={64} className="mb-2 rounded object-cover h-16 w-16" />
             )}
-            <div className="flex justify-center rounded-lg border border-dashed border-white/20 px-6 py-8">
+            <div className="flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-8">
               <div className="text-center">
                 <PhotoIcon className="mx-auto size-10 text-gray-600 mb-2" />
                 <CldUploadButton uploadPreset="ecp_products" onSuccess={handleFileUpload}

@@ -22,18 +22,18 @@ export default function AuthInput({
   const inputType = isPassword ? (showPassword ? "text" : "password") : type;
 
   return (
-    <div className="flex flex-col gap-2">
-      <label className="text-sm font-medium">{label}</label>
+    <div className="flex flex-col gap-1.5">
+      <label className="text-sm font-medium text-gray-700">{label}</label>
       <div className="relative">
         <input
           type={inputType}
           placeholder={placeholder}
-          className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 transition ${
+          className={`w-full px-4 py-2.5 rounded-lg border bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 transition text-sm ${
             isPassword ? "pr-11" : ""
           } ${
             hasError
-              ? "border-red-500 focus:ring-red-400"
-              : "border-gray-300 focus:ring-black"
+              ? "border-red-300 focus:ring-red-300"
+              : "border-gray-200 focus:ring-indigo-500 focus:border-transparent"
           }`}
           onChange={onChange}
           value={value}

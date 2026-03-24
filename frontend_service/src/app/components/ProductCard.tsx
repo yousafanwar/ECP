@@ -1,30 +1,46 @@
 'use client';
 import AddToCartBtn from "./buttons/AddToCartBtn";
-import BuyNowBtn from "./buttons/BuyNow";
 import { useRouter } from "next/navigation";
 
 const ProductCard = (props: any) => {
     const router = useRouter();
 
     return (
-        <div key={props.product.product_id} className="bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-transform transform hover:-translate-y-2 hover:shadow-2xl cursor-pointer">
-            <div onClick={() => { router.push(`/product/${props.product.product_id}`) }}>
+        <div key={props.product.product_id} className="group bg-white rounded-xl border border-gray-100 overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-gray-200 hover:-translate-y-1">
+            <div className="relative cursor-pointer overflow-hidden" onClick={() => { router.push(`/product/${props.product.product_id}`) }}>
                 <img
                     src={props.product.image_url}
                     alt="Product image"
-                    className="w-full h-56 object-cover"
+                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-
-                <div className="p-5">
-                    <h2 className="text-lg font-bold capitalize mb-2">{props.product.name}</h2>
-                    <p className="text-gray-400 mb-4">{props.product.description}</p>
-                </div>
-
+                {props.product.stock_quantity <= 3 && props.product.stock_quantity > 0 && (
+                    <span className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Low Stock</span>
+                )}
+                {props.product.stock_quantity <= 0 && (
+                    <span className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Sold Out</span>
+                )}
             </div>
-            <div className="flex justify-between items-center gap-2 p-4">
-                <span className="text-xl font-semibold">${props.product.price}</span>
-                <AddToCartBtn product_id={props.product.product_id} qty={1} />
-                <BuyNowBtn />
+
+            <div className="p-4">
+                <div className="flex items-center gap-2 mb-2">
+                    {props.product.category_title && (
+                        <span className="text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{props.product.category_title}</span>
+                    )}
+                    {props.product.brand_title && (
+                        <span className="text-[11px] font-medium text-gray-500">{props.product.brand_title}</span>
+                    )}
+                </div>
+                <h2
+                    className="text-sm font-semibold text-gray-900 capitalize mb-1 cursor-pointer hover:text-indigo-600 transition-colors line-clamp-1"
+                    onClick={() => { router.push(`/product/${props.product.product_id}`) }}
+                >
+                    {props.product.name}
+                </h2>
+                <p className="text-xs text-gray-400 mb-3 line-clamp-2">{props.product.description}</p>
+                <div className="flex justify-between items-center pt-3 border-t border-gray-50">
+                    <span className="text-lg font-bold text-gray-900">${props.product.price}</span>
+                    <AddToCartBtn product_id={props.product.product_id} qty={1} />
+                </div>
             </div>
         </div>
     )

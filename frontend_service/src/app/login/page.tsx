@@ -91,20 +91,25 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-black flex items-center justify-center">
-            <div className="bg-white w-full max-w-md p-10 rounded-2xl shadow-xl text-black">
-                <h1 className="text-3xl font-semibold mb-8">Login</h1>
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
+            <div className="bg-white w-full max-w-md p-10 rounded-2xl shadow-lg border border-gray-100 text-gray-900">
+                <div className="text-center mb-8">
+                    <h1 className="text-2xl font-bold text-gray-900">Welcome back</h1>
+                    <p className="text-sm text-gray-500 mt-1">Sign in to your account</p>
+                </div>
 
                 {/* Error Message */}
                 {error && (
-                    <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
                         {error}
                     </div>
                 )}
 
                 {/* Success Message */}
                 {success && (
-                    <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm">
+                    <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-sm flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         {success}
                     </div>
                 )}
@@ -137,26 +142,26 @@ export default function LoginPage() {
                     <div className="text-right">
                         <Link
                             href="#"
-                            className="text-red-600 text-sm hover:underline"
+                            className="text-indigo-600 text-sm hover:underline"
                         >
                             Forgot Password?
                         </Link>
                     </div>
 
                     <button
-                        className="bg-black text-white py-3 rounded-xl hover:opacity-90 transition disabled:bg-gray-400 disabled:cursor-not-allowed cursor-pointer font-semibold"
+                        className="bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition font-semibold cursor-pointer disabled:bg-gray-300 disabled:cursor-not-allowed"
                         onClick={handleLogin}
                         disabled={isLoading}
                     >
-                        {isLoading ? "Logging in..." : "Login"}
+                        {isLoading ? "Signing in..." : "Sign in"}
                     </button>
-                    <p className="text-center text-sm">
+                    <p className="text-center text-sm text-gray-500">
                         Don&apos;t have an account?{" "}
                         <button 
-                            className="cursor-pointer text-red-600 font-medium hover:underline"
+                            className="cursor-pointer text-indigo-600 font-medium hover:underline"
                             onClick={() => router.push('/register')}
                         >
-                            Register
+                            Create account
                         </button>
                     </p>
                 </div>

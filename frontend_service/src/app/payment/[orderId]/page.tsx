@@ -88,16 +88,16 @@ const PaymentPage = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="text-white text-xl animate-pulse">Loading payment details...</div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500 text-lg animate-pulse">Loading payment details...</div>
             </div>
         );
     }
 
     if (!order) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="text-white text-xl">Order not found.</div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500 text-lg">Order not found.</div>
             </div>
         );
     }
@@ -107,8 +107,8 @@ const PaymentPage = () => {
     // ── Success Screen ──────────────────────────────────────────────────────────
     if (step === "success") {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl p-10 max-w-md w-full text-center shadow-2xl">
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center px-4">
+                <div className="bg-white rounded-2xl p-10 max-w-md w-full text-center shadow-lg border border-gray-100">
                     <div className="text-7xl mb-4">📦</div>
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Placed!</h1>
                     <p className="text-gray-600 mb-1 font-medium">Thank you for your order.</p>
@@ -126,24 +126,24 @@ const PaymentPage = () => {
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Payment Method</span>
-                            <span className="font-medium">Cash on Delivery</span>
+                            <span className="font-medium text-gray-900">Cash on Delivery</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Shipping to</span>
-                            <span className="font-medium text-right max-w-[60%]">
+                            <span className="font-medium text-right max-w-[60%] text-gray-900">
                                 {order.address.street}, {order.address.city}
                             </span>
                         </div>
                     </div>
                     <button
                         onClick={() => router.push("/")}
-                        className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
+                        className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors cursor-pointer"
                     >
                         Continue Shopping
                     </button>
                     <button
                         onClick={() => router.push("/orders")}
-                        className="w-full mt-3 border border-black text-black py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors cursor-pointer"
+                        className="w-full mt-3 border border-gray-200 text-gray-700 py-3 rounded-lg font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors cursor-pointer"
                     >
                         View My Orders
                     </button>
@@ -154,9 +154,9 @@ const PaymentPage = () => {
 
     // ── Payment Form ────────────────────────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-black text-white py-8 px-4">
+        <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-5xl mx-auto">
-                <h1 className="text-4xl font-bold text-center mb-2 text-gray-400">Payment</h1>
+                <h1 className="text-2xl font-bold text-center mb-2 text-gray-900">Payment</h1>
                 <p className="text-center text-gray-500 mb-8 text-sm">Complete your purchase securely</p>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -165,8 +165,8 @@ const PaymentPage = () => {
                     <div className="lg:col-span-2 space-y-6">
 
                         {/* Payment Method Selector */}
-                        <div className="bg-white text-black rounded-xl p-6">
-                            <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
+                        <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <h2 className="text-lg font-bold mb-4">Payment Method</h2>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                 {/* Easypaisa — commented out until wallet payments are implemented */}
                                 {/* <button onClick={() => setPaymentMethod("easypaisa")} ...>
@@ -187,7 +187,7 @@ const PaymentPage = () => {
                                     onClick={() => setPaymentMethod("cod")}
                                     className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 transition-all cursor-pointer ${
                                         paymentMethod === "cod"
-                                            ? "border-black bg-gray-100"
+                                            ? "border-indigo-500 bg-indigo-50"
                                             : "border-gray-200 hover:border-gray-400"
                                     }`}
                                 >
@@ -205,7 +205,7 @@ const PaymentPage = () => {
 
                         {/* Cash on Delivery */}
                         {paymentMethod === "cod" && (
-                            <div className="bg-white text-black rounded-xl p-6">
+                            <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm">
                                 <div className="flex items-center gap-3 mb-4">
                                     <span className="text-4xl">💰</span>
                                     <h2 className="text-xl font-semibold">Cash on Delivery</h2>
@@ -223,7 +223,7 @@ const PaymentPage = () => {
 
                         {/* No method selected */}
                         {!paymentMethod && (
-                            <div className="bg-white text-black rounded-xl p-6 text-center text-gray-400">
+                            <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm text-center text-gray-400">
                                 Please select a payment method above to continue.
                             </div>
                         )}
@@ -231,8 +231,8 @@ const PaymentPage = () => {
 
                     {/* ── Right: Order Summary ── */}
                     <div className="lg:col-span-1">
-                        <div className="bg-white text-black rounded-xl p-6 sticky top-4">
-                            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+                        <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm sticky top-20">
+                            <h2 className="text-lg font-bold mb-4">Order Summary</h2>
 
                             {/* Items */}
                             <div className="space-y-3 mb-4 max-h-56 overflow-y-auto">
@@ -282,7 +282,7 @@ const PaymentPage = () => {
                             <button
                                 onClick={handlePayment}
                                 disabled={isProcessing || !paymentMethod}
-                                className="w-full bg-black text-white py-3 rounded-lg mt-5 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer"
+                                className="w-full bg-indigo-600 text-white py-3 rounded-lg mt-5 font-semibold hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer"
                             >
                                 {isProcessing
                                     ? "Processing..."
@@ -295,7 +295,7 @@ const PaymentPage = () => {
 
                             <button
                                 onClick={() => router.back()}
-                                className="w-full mt-3 border border-black text-black py-2 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors cursor-pointer"
+                                className="w-full mt-3 border border-gray-200 text-gray-700 py-2 rounded-lg text-sm font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors cursor-pointer"
                             >
                                 ← Back to Checkout
                             </button>

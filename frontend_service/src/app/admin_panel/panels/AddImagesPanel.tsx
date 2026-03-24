@@ -8,9 +8,9 @@ import { Spinner, FullPageSpinner } from "../../components/LoadingSpinners";
 import { apiGet, apiPost } from "@/lib/api";
 import styles from "../admin.module.css";
 
-const menuBtnCls = "flex w-full items-center justify-between rounded-md bg-white/5 px-3 py-2 text-sm text-white ring-1 ring-white/10 hover:bg-white/10";
-const menuItemsCls = "absolute z-10 mt-1 w-full rounded-md bg-gray-800 ring-1 ring-white/10 max-h-60 overflow-y-auto";
-const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white";
+const menuBtnCls = "flex w-full items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
+const menuItemsCls = "absolute z-10 mt-1 w-full rounded-md bg-white ring-1 ring-gray-200 max-h-60 overflow-y-auto shadow-lg";
+const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900";
 
 interface ProductListItem { product_id: string; name: string; }
 interface UploadedImage { url: string; thumbnail: string; }
@@ -63,7 +63,7 @@ export default function AddImagesPanel() {
       <div className={styles.panelForm}>
         {/* Product selector */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-white mb-1">Select product</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Select product</label>
           <Menu as="div" className="relative max-w-sm">
             <MenuButton type="button" onClick={fetchProducts} className={menuBtnCls}>
               {selectedProduct?.name || "Select a product"}
@@ -86,7 +86,7 @@ export default function AddImagesPanel() {
 
         {/* Upload area */}
         <div className="mb-6">
-          <label className="block text-sm font-medium text-white mb-2">Upload images</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Upload images</label>
 
           {uploadedImages.length > 0 && (
             <div className="flex flex-wrap gap-3 mb-4">
@@ -103,7 +103,7 @@ export default function AddImagesPanel() {
             </div>
           )}
 
-          <div className="flex justify-center rounded-lg border border-dashed border-white/20 px-6 py-8">
+          <div className="flex justify-center rounded-lg border border-dashed border-gray-300 px-6 py-8">
             <div className="text-center">
               <PhotoIcon className="mx-auto size-10 text-gray-600 mb-2" />
               <CldUploadButton uploadPreset="ecp_products" onSuccess={handleFileUpload}

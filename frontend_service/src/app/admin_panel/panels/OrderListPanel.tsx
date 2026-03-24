@@ -185,7 +185,7 @@ export default function OrderListPanel() {
             placeholder="Search by name, email or order ID…"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="flex-1 min-w-[200px] bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            className="flex-1 min-w-[200px] bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
 
           {/* Date From */}
@@ -195,25 +195,25 @@ export default function OrderListPanel() {
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
 
           {/* Date To */}
           <div className="flex items-center gap-2">
-            <label className="text-gray-400 text-xs whitespace-nowrap">To</label>
+            <label className="text-gray-500 text-xs whitespace-nowrap">To</label>
             <input
               type="date"
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
-              className="bg-gray-800 border border-gray-600 text-white text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400"
+              className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
 
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-xs px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg transition-colors whitespace-nowrap"
+              className="text-xs px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition-colors whitespace-nowrap"
             >
               ✕ Clear filters
             </button>
@@ -229,7 +229,7 @@ export default function OrderListPanel() {
               className={`text-xs px-3 py-1 rounded-full font-semibold border transition-all ${
                 statusFilter.includes(s)
                   ? `${STATUS_COLORS[s]} text-white border-transparent`
-                  : 'bg-transparent text-gray-400 border-gray-600 hover:border-gray-400'
+                  : 'bg-transparent text-gray-500 border-gray-300 hover:border-gray-400'
               }`}
             >
               {s}
@@ -292,15 +292,15 @@ export default function OrderListPanel() {
                       </button>
 
                       {openDropdownId === o.order_id && (
-                        <div className="absolute left-0 top-8 z-30 bg-gray-800 border border-gray-600 rounded-lg shadow-xl py-1 min-w-[120px]">
+                        <div className="absolute left-0 top-8 z-30 bg-white border border-gray-200 rounded-lg shadow-xl py-1 min-w-[120px]">
                           {ALL_STATUSES.map(s => (
                             <button
                               key={s}
                               onClick={() => { handleStatusChange(o.order_id, s); setOpenDropdownId(null); }}
-                              className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-left hover:bg-gray-700 transition-colors"
+                              className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-left hover:bg-gray-50 transition-colors"
                             >
                               <span className={`inline-block w-2 h-2 rounded-full ${STATUS_COLORS[s] ?? 'bg-gray-500'}`} />
-                              <span className="text-white capitalize">{s}</span>
+                              <span className="text-gray-700 capitalize">{s}</span>
                             </button>
                           ))}
                         </div>
@@ -312,7 +312,7 @@ export default function OrderListPanel() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleViewOrder(o.order_id)}
-                        className="text-xs px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                        className="text-xs px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded transition-colors"
                       >
                         View
                       </button>
@@ -335,18 +335,18 @@ export default function OrderListPanel() {
       {/* View Order Modal */}
       {viewOrderId && (
         <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
           onClick={() => setViewOrderId(null)}
         >
           <div
-            className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto"
+            className="bg-white border border-gray-200 rounded-xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto shadow-xl"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white font-semibold text-lg">Order Details</h3>
+              <h3 className="text-gray-900 font-semibold text-lg">Order Details</h3>
               <button
                 onClick={() => setViewOrderId(null)}
-                className="text-gray-400 hover:text-white text-xl leading-none"
+                className="text-gray-400 hover:text-gray-700 text-xl leading-none"
               >
                 ✕
               </button>
@@ -370,7 +370,7 @@ export default function OrderListPanel() {
                 {viewOrder.orderAddress && (
                   <div>
                     <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Shipping Address</p>
-                    <p className="text-white text-sm">
+                    <p className="text-gray-900 text-sm">
                       {viewOrder.orderAddress.street}, {viewOrder.orderAddress.city}
                       {viewOrder.orderAddress.state ? `, ${viewOrder.orderAddress.state}` : ''}, {viewOrder.orderAddress.country}
                     </p>
@@ -381,12 +381,12 @@ export default function OrderListPanel() {
                   <p className="text-gray-400 text-xs uppercase tracking-wide mb-2">Items</p>
                   <div className="space-y-2">
                     {viewOrder.orderItems.map((item, i) => (
-                      <div key={i} className="flex justify-between items-center bg-gray-800 rounded-lg px-3 py-2">
+                      <div key={i} className="flex justify-between items-center bg-gray-50 rounded-lg px-3 py-2">
                         <div>
-                          <p className="text-white text-sm font-medium">{item.name}</p>
+                          <p className="text-gray-900 text-sm font-medium">{item.name}</p>
                           <p className="text-gray-400 text-xs">Qty: {item.quantity}</p>
                         </div>
-                        <p className="text-white text-sm">${item.price * item.quantity}</p>
+                        <p className="text-gray-900 text-sm">${item.price * item.quantity}</p>
                       </div>
                     ))}
                   </div>
