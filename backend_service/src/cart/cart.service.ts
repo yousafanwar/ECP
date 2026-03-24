@@ -63,7 +63,7 @@ export class CartService {
 
   async getCartItems(cart_id) {
     try {
-      const cartItemsRes = await this.dbService.dbPool().query(`select cart_items.cart_item_id, cart_items.product_id, cart_items.quantity, products.name, products.price , product_images.image_url, product_images.is_hero from cart inner join cart_items on cart.cart_id = cart_items.cart_id inner join products on products.product_id = cart_items.product_id inner join product_images on product_images.product_id = products.product_id and cart.cart_id = $1;`, [cart_id]);
+      const cartItemsRes = await this.dbService.dbPool().query(`SELECT cart_items.cart_item_id, cart_items.product_id, cart_items.quantity, products.name, products.price, product_images.image_url, product_images.is_hero FROM cart INNER JOIN cart_items ON cart.cart_id = cart_items.cart_id INNER JOIN products ON products.product_id = cart_items.product_id INNER JOIN product_images ON product_images.product_id = products.product_id AND product_images.is_hero = true WHERE cart.cart_id = $1;`, [cart_id]);
       const result = cartItemsRes.rows.map((item) => {
         return {
           cart_item_id: item.cart_item_id,
