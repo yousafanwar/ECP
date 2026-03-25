@@ -42,11 +42,11 @@ const Cart = () => {
         const result = await response.json();
         const totalPrice = result.payload.reduce(
           (acc: number, item: cartItemsArr) =>
-            acc + item.price * item.quantity,
+            acc + Number(item.price) * item.quantity,
           0
         );
         setCartItems(result.payload);
-        setPriceTotal(totalPrice);
+        setPriceTotal(parseFloat(totalPrice.toFixed(2)));
       } catch (err) {
         console.error('Fetch failed:', err);
       }
@@ -103,7 +103,7 @@ const Cart = () => {
       );
 
       dispatch(updateCount(response.payload.totalCartQty));
-      setPriceTotal(response.payload.CalCartPrice);
+      setPriceTotal(parseFloat(Number(response.payload.CalCartPrice).toFixed(2)));
     } catch (err: any) {
       console.error('Could not update cart quantity:', err.message ?? err);
     }
@@ -178,15 +178,15 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className={styles.summaryRow}>
             <span>Price Total</span>
-            <span>${priceTotal}</span>
+            <span>${priceTotal.toFixed(2)}</span>
           </div>
           <div className={styles.summaryRow}>
             <span>Shipping</span>
-            <span>$30</span>
+            <span>$30.00</span>
           </div>
           <div className={styles.summaryTotal}>
             <span>Total</span>
-            <span>${priceTotal + 30}</span>
+            <span>${(priceTotal + 30).toFixed(2)}</span>
           </div>
           <button className={styles.checkoutBtn} onClick={checkOut}>Proceed to Checkout</button>
           <button onClick={() => { router.push('/') }} className="w-full cursor-pointer bg-white border-1.5 border-gray-200 text-gray-700 py-3 rounded-lg mt-3 font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors">Continue Shopping</button>

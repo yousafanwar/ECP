@@ -57,10 +57,10 @@ const Order = () => {
         setOrderItems(result.payload.orderItems);
         
         const total = result.payload.orderItems.reduce(
-          (acc: number, item: any) => acc + item.price * item.quantity,
+          (acc: number, item: any) => acc + Number(item.price) * item.quantity,
           0
         );
-        setPriceTotal(total);
+        setPriceTotal(parseFloat(total.toFixed(2)));
       } catch (err: any) {
         console.error(err);
       }
@@ -173,7 +173,7 @@ const Order = () => {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${item.price * item.quantity}</p>
+                      <p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -182,15 +182,15 @@ const Order = () => {
               <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between">
                   <span>Price Total</span>
-                  <span>${priceTotal}</span>
+                  <span>${priceTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$30</span>
+                  <span>$30.00</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${priceTotal + 30}</span>
+                  <span>${(priceTotal + 30).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -382,7 +382,7 @@ const Order = () => {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${item.price * item.quantity}</p>
+                      <p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -391,15 +391,15 @@ const Order = () => {
               <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between">
                   <span>Price Total</span>
-                  <span>${priceTotal}</span>
+                  <span>${priceTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$30</span>
+                  <span>$30.00</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${priceTotal + 30}</span>
+                  <span>${(priceTotal + 30).toFixed(2)}</span>
                 </div>
               </div>
 
