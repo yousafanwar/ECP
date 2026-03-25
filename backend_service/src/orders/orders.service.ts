@@ -123,11 +123,12 @@ export class OrdersService {
 
             const orderAddress = orderAddressRes.rows[0];
 
-            const orderItemsRes = await this.pool.dbPool().query(`select order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
-            from orders inner join order_items on orders.order_id = order_items.order_id 
-            inner join products on products.product_id = order_items.product_id 
-            inner join product_images 
-            on product_images.product_id = products.product_id and orders.order_id = $1;`, [order_id]);
+           const orderItemsRes = await this.pool.dbPool().query(`SELECT order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
+            FROM orders INNER JOIN order_items ON orders.order_id = order_items.order_id 
+            INNER JOIN products ON products.product_id = order_items.product_id 
+            INNER JOIN product_images ON product_images.product_id = products.product_id
+            AND product_images.is_hero = true
+            WHERE orders.order_id = $1;`, [order_id]);
 
             const orderItems = orderItemsRes.rows.map((item) => {
                 return {
