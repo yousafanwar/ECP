@@ -1,8 +1,11 @@
 import ProductListings from "./components/ProductListings";
 import { ProductItem } from "./interfaces";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:5000";
+
 export default async function Home() {
-  const response = await fetch(`http://localhost:5000/product`, { cache: 'no-store' });
+  const response = await fetch(`${API_BASE_URL}/product`, { cache: 'no-store' });
   const result = await response.json();
   const products: ProductItem[] = result.payload ?? [];
 
