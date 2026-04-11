@@ -4,38 +4,38 @@ export class AddProductDTO {
     @IsString()
     @IsNotEmpty()
     @MaxLength(255)
-    name: string;
+    name!: string;
 
     @IsNumber()
     @IsNotEmpty()
-    price: number;
+    price!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    sku: number;
+    sku!: number;
 
     @IsNumber()
     @IsNotEmpty()
-    stock_quantity: number;
+    stock_quantity!: number;
 
     @IsString()
     @IsNotEmpty()
-    description: string;
+    description!: string;
 
     @IsUUID()
     @IsNotEmpty()
-    category_id: string;
+    category_id!: string;
 
+    @IsOptional()
     @IsUUID()
-    @IsNotEmpty()
-    brand_id: string;
+    brand_id?: string;
 
     @IsString()
     @IsNotEmpty()
-    image_url: string;
+    image_url!: string;
 
     @IsBoolean()
-    is_hero: boolean
+    is_hero!: boolean
 }
 
 export class UpdateProductDTO {
@@ -73,5 +73,5 @@ export class AddProductImagesDTO {
     @IsArray()
     @IsString({ each: true })
     @IsNotEmpty({ each: true })
-    image_urls: string[];
+    image_urls!: string[];
 }

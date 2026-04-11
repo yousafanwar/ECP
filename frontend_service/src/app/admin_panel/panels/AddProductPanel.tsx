@@ -15,9 +15,9 @@ const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-600 hover
 
 interface FormData {
   productName: string;
-  price: number;
-  sku: number;
-  stockQuantity: number;
+  price: string;
+  sku: string;
+  stockQuantity: string;
   description: string;
   category: string;
   brand: string;
@@ -26,7 +26,7 @@ interface FormData {
 }
 
 const EMPTY_FORM: FormData = {
-  productName: "", price: 0, sku: 0, stockQuantity: 0,
+  productName: "", price: "", sku: "", stockQuantity: "",
   description: "", category: "", brand: "", fileUpload: "", imagePublicId: "",
 };
 
@@ -34,7 +34,7 @@ export default function AddProductPanel() {
   const [formData, setFormData] = useState<FormData>(EMPTY_FORM);
   const [imageThumbnail, setImageThumbnail] = useState("");
   const [categories, setCategories] = useState<Array<{ category_id: string; name: string }>>([]);
-  const [brands, setBrands] = useState<Array<{ brand_id: number; name: string }>>([]);
+  const [brands, setBrands] = useState<Array<{ brand_id: string; name: string }>>([]);
   const [selectedLabels, setSelectedLabels] = useState({ category: "", brand: "" });
   const [loading, setLoading] = useState({ fullPage: false, category: false, brand: false });
 
@@ -48,8 +48,8 @@ export default function AddProductPanel() {
       setLoading(prev => ({ ...prev, category: true }));
       const res = await apiGet('/categories');
       const data = await res.json();
-      setCategories(data.payload);
-    } catch (err) { console.error(err); }
+      setCategories(Array.isArray(data.payload) ? data.payload : []);
+    } catch (err) { console.error(err); setCategories([]); }
     finally { setLoading(prev => ({ ...prev, category: false })); }
   };
 
@@ -58,23 +58,28 @@ export default function AddProductPanel() {
       setLoading(prev => ({ ...prev, brand: true }));
       const res = await apiGet('/brands');
       const data = await res.json();
-      setBrands(data.payload);
-    } catch (err) { console.error(err); }
+      setBrands(Array.isArray(data.payload) ? data.payload : []);
+    } catch (err) { console.error(err); setBrands([]); }
     finally { setLoading(prev => ({ ...prev, brand: false })); }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.productName || !formData.price || !formData.sku || !formData.stockQuantity || !formData.description || !formData.category || !formData.fileUpload) {
+      alert('Please complete all required fields and upload an image.');
+      return;
+    }
+
     const obj = {
       name: formData.productName,
       price: Number(formData.price),
-      sku: formData.sku,
+      sku: Number(formData.sku),
       stock_quantity: Number(formData.stockQuantity),
       description: formData.description,
       category_id: formData.category,
-      brand_id: formData.brand,
+      brand_id: formData.brand || null,
       image_url: formData.fileUpload,
-      imagePublicId: formData.imagePublicId,
+      is_hero: true,
     };
     try {
       setLoading(prev => ({ ...prev, fullPage: true }));
@@ -109,7 +114,7 @@ export default function AddProductPanel() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
             <input name="price" type="number" min="0" step="0.01" placeholder="0.00"
               value={formData.price}
-              onChange={e => setFormData(prev => ({ ...prev, price: e.target.value as any }))}
+              onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
               className={inputCls}
             />
           </div>
@@ -118,7 +123,7 @@ export default function AddProductPanel() {
             <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
             <input name="sku" type="text" placeholder="123456789" maxLength={12}
               value={formData.sku}
-              onChange={e => setFormData(prev => ({ ...prev, sku: e.target.value as any }))}
+              onChange={e => setFormData(prev => ({ ...prev, sku: e.target.value }))}
               className={inputCls}
             />
           </div>
@@ -127,7 +132,7 @@ export default function AddProductPanel() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Stock quantity</label>
             <input name="stockQuantity" type="number" min="0" placeholder="0"
               value={formData.stockQuantity}
-              onChange={e => setFormData(prev => ({ ...prev, stockQuantity: e.target.value as any }))}
+              onChange={e => setFormData(prev => ({ ...prev, stockQuantity: e.target.value }))}
               className={inputCls}
             />
           </div>
@@ -152,7 +157,7 @@ export default function AddProductPanel() {
                 </span>
               </MenuButton>
               <MenuItems className={menuItemsCls}>
-                {categories.map(c => (
+                {categories?.map(c => (
                   <MenuItem key={c.category_id}>
                     <button type="button" className={menuOptCls}
                       onClick={() => { setSelectedLabels(p => ({ ...p, category: c.name })); setFormData(p => ({ ...p, category: c.category_id })); }}
@@ -167,14 +172,14 @@ export default function AddProductPanel() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
             <Menu as="div" className="relative w-full">
               <MenuButton type="button" onClick={fetchBrands} className={menuBtnCls}>
-                {selectedLabels.brand || "Select brand"}
+                {selectedLabels.brand || "Select brand (optional)"}
                 <span className="flex items-center gap-1">
                   {loading.brand && <Spinner />}
                   <ChevronDownIcon className="size-4 text-gray-400" />
                 </span>
               </MenuButton>
               <MenuItems className={menuItemsCls}>
-                {brands.map(b => (
+                {brands?.map(b => (
                   <MenuItem key={b.brand_id}>
                     <button type="button" className={menuOptCls}
                       onClick={() => { setSelectedLabels(p => ({ ...p, brand: b.name })); setFormData(p => ({ ...p, brand: b.brand_id.toString() })); }}
