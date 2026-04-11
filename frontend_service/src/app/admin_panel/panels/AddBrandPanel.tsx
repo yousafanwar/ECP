@@ -4,7 +4,7 @@ import { FullPageSpinner } from "../../components/LoadingSpinners";
 import { apiPost } from "@/lib/api";
 import styles from "../admin.module.css";
 
-const inputCls = "block w-full rounded-md bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 outline outline-1 outline-white/10 focus:outline-2 focus:outline-indigo-500";
+const inputCls = "block w-full rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 outline outline-1 outline-gray-200 focus:outline-2 focus:outline-indigo-500";
 
 export default function AddBrandPanel() {
   const [formData, setFormData] = useState({ name: "", description: "" });
@@ -30,7 +30,7 @@ export default function AddBrandPanel() {
       <form onSubmit={handleSubmit} className={styles.panelForm}>
         <div className="grid grid-cols-1 gap-y-5 sm:grid-cols-6">
           <div className="sm:col-span-4">
-            <label className="block text-sm font-medium text-white mb-1">Brand name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brand name</label>
             <input type="text" placeholder="Apple"
               value={formData.name}
               onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -38,7 +38,7 @@ export default function AddBrandPanel() {
             />
           </div>
           <div className="col-span-full">
-            <label className="block text-sm font-medium text-white mb-1">Description</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea rows={3} placeholder="Brief description of this brand..."
               value={formData.description}
               onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}

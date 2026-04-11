@@ -3,8 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addItem, updateCount } from '@/app/store/cartSlice';
 import { restoreCartCount } from '@/app/helperFunctions';
 import { apiPost, ensureSession } from "@/lib/api";
-import { RootState } from "@/app/store/store";
-import { useRouter } from "next/navigation";
+import { toast } from 'sonner';
 
 interface AddToCartProps {
     product_id: string;
@@ -15,9 +14,7 @@ interface AddToCartProps {
 const AddToCartBtn = (props: AddToCartProps) => {
 
     const dispatch = useDispatch();
-    const router = useRouter();
     const selector = useSelector((state: any) => state.cartStore.items);
-
     const getCartCount = async (cartId: string) => {
         const cartCount = await restoreCartCount(cartId);
         dispatch(updateCount(cartCount ?? 0));
@@ -27,7 +24,7 @@ const AddToCartBtn = (props: AddToCartProps) => {
         // Ensure a session exists (creates guest session if needed)
         const sessionUserId = await ensureSession();
         if (!sessionUserId) {
-            alert("Could not create a session. Please try again.");
+            toast.error("Could not create a session. Please try again.");
             return;
         }
 
@@ -52,14 +49,15 @@ const AddToCartBtn = (props: AddToCartProps) => {
             if (result?.payload?.cartId) {
                 localStorage.setItem('cartId', result.payload.cartId);
             }
-            alert(result.message);
+            toast.success(result.message);
         } catch (err) {
             console.error("Error while updating the cart", err);
+            toast.error("Could not add item to cart. Please try again.");
         }
     };
 
     return (
-        <button onClick={addItemToCart} className="cursor-pointer bg-green-600 hover:bg-green-700 text-white font-semibold px-3 py-2 rounded-lg text-sm transition-colors">
+        <button onClick={addItemToCart} className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-2 rounded-lg text-sm transition-colors">
             Add to Cart
         </button>
     )

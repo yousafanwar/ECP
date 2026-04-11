@@ -125,7 +125,6 @@ export class CartService {
   async updateCartItemQty(body) {
     const client = await this.dbService.dbPool().connect()
     let updatedItemQty = 0;
-    console.log('body', body);
     try {
       await client.query('BEGIN');
       const stockQty = await client.query(`SELECT stock_quantity FROM public.products where product_id=$1 FOR UPDATE;`, [body.product_id]);

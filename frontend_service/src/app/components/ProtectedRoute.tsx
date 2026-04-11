@@ -33,7 +33,7 @@ export function ProtectedRoute({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="mb-4 h-8 w-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <div className="mb-4 h-8 w-8 border-4 border-gray-300 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -66,7 +66,7 @@ export function AdminRoute({
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="mb-4 h-8 w-8 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin mx-auto"></div>
+          <div className="mb-4 h-8 w-8 border-4 border-gray-300 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>

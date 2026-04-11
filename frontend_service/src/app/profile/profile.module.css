@@ -46,7 +46,7 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #1f2937;
+  background: #6366f1;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -144,7 +144,7 @@
 
 .formGroup input:focus,
 .formGroup select:focus {
-  border-color: #1f2937;
+  border-color: #6366f1;
 }
 
 /* ── Buttons ── */
@@ -174,7 +174,7 @@
 
 .saveBtn {
   padding: 9px 20px;
-  background: #1f2937;
+  background: #6366f1;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -185,7 +185,7 @@
 }
 
 .saveBtn:hover:not(:disabled) {
-  background: #111827;
+  background: #4f46e5;
 }
 
 .saveBtn:disabled {
@@ -260,7 +260,7 @@
 .ordersToggleBtn {
   width: 100%;
   padding: 12px 20px;
-  background: #1f2937;
+  background: #6366f1;
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -275,7 +275,7 @@
 }
 
 .ordersToggleBtn:hover {
-  background: #111827;
+  background: #4f46e5;
 }
 
 .chevron {

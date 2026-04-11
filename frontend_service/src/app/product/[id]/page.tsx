@@ -6,7 +6,7 @@ import AddToCartBtn from "@/app/components/buttons/AddToCartBtn";
 import { useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
 
-const ProductPage = ({ params }: { params: { id: string } }) => {
+const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   const [result, setResult] = useState<ProductData | null>(null);
   const [mainImage, setMainImage] = useState<string>("");
@@ -90,7 +90,7 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
   };
 
   return (
-    <div>
+    <div className="bg-white min-h-screen">
       {result &&
         <div className={styles.productContainer}>
           <div className={styles.imageSection}>
@@ -107,26 +107,32 @@ const ProductPage = ({ params }: { params: { id: string } }) => {
                     style={{
                       cursor: "pointer",
                       opacity: mainImage === img.image_url ? 1 : 0.6,
-                      border: mainImage === img.image_url ? "2px solid #3b82f6" : "none",
+                      border: mainImage === img.image_url ? "2px solid #6366f1" : "2px solid #e2e8f0",
                       boxSizing: "border-box"
                     }}
                   />
                 ))}
               </div>
             )}
-            {/* <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} />
-            <img src="/abstract-geometric-blue-frame-logo.jpg" className={styles.thumbnail} /> */}
           </div>
           <div className={styles.detailsSection}>
+            <div className="flex items-center gap-2 mb-1">
+              {result.brand_title && (
+                <span className="text-xs font-medium text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">{result.brand_title}</span>
+              )}
+              {result.category_title && (
+                <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">{result.category_title}</span>
+              )}
+            </div>
             <h1 className={styles.productTitle}>{result.product_title}</h1>
             <p className={styles.productPrice}>${result.price}</p>
             <p className={styles.productDescription}>
               {result.description}
             </p>
             {lowQty && (
-              <div className="flex items-center gap-2 rounded-md border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+              <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                 <svg
-                  className="h-5 w-5 text-yellow-600"
+                  className="h-5 w-5 text-amber-500 flex-shrink-0"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"

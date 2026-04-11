@@ -57,10 +57,10 @@ const Order = () => {
         setOrderItems(result.payload.orderItems);
         
         const total = result.payload.orderItems.reduce(
-          (acc: number, item: any) => acc + item.price * item.quantity,
+          (acc: number, item: any) => acc + Number(item.price) * item.quantity,
           0
         );
-        setPriceTotal(total);
+        setPriceTotal(parseFloat(total.toFixed(2)));
       } catch (err: any) {
         console.error(err);
       }
@@ -151,15 +151,15 @@ const Order = () => {
   const statusInfo = STATUS_INFO[orderStatus ?? ''] ?? { icon: 'ℹ️', message: orderStatus ?? '', colorClasses: 'text-gray-700 bg-gray-50 border-gray-200' };
 
   return (
-    <div className="min-h-screen bg-black text-white py-8 px-4">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-gray-400">
+        <h1 className="text-2xl font-bold text-center mb-8 text-gray-900">
           {isFinalized ? 'Order Details' : 'Checkout'}
         </h1>
 
         {isFinalized ? (
           <div className="max-w-lg mx-auto">
-            <div className="bg-white text-black rounded-lg p-6">
+            <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm">
               <div className={`mb-4 py-3 text-center text-sm font-medium border rounded-lg ${statusInfo.colorClasses}`}>
                 {statusInfo.icon} {statusInfo.message}
               </div>
@@ -173,7 +173,7 @@ const Order = () => {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${item.price * item.quantity}</p>
+                      <p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -182,21 +182,21 @@ const Order = () => {
               <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between">
                   <span>Price Total</span>
-                  <span>${priceTotal}</span>
+                  <span>${priceTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$30</span>
+                  <span>$30.00</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${priceTotal + 30}</span>
+                  <span>${(priceTotal + 30).toFixed(2)}</span>
                 </div>
               </div>
 
               <button
                 onClick={() => router.push('/')}
-                className="w-full bg-black text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors cursor-pointer"
+                className="w-full bg-indigo-600 text-white py-3 rounded-lg mt-6 font-semibold hover:bg-indigo-700 transition-colors cursor-pointer"
               >
                 Continue Shopping
               </button>
@@ -205,9 +205,9 @@ const Order = () => {
         ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white text-black rounded-lg p-6">
+            <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold">Address</h2>
+                <h2 className="text-xl font-bold">Address</h2>
               </div>
 
               {!savedAddress && !isEditingAddress && (
@@ -238,7 +238,7 @@ const Order = () => {
                   </div>
                   <button
                     onClick={() => setIsEditingAddress(true)}
-                    className="mt-4 cursor-pointer px-6 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800 transition-colors"
+                    className="mt-4 cursor-pointer px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
                   >
                     Change address
                   </button>
@@ -261,7 +261,7 @@ const Order = () => {
                         name="address"
                         value={newAddress.street}
                         onChange={(e) => setNewAddress((prev) => ({ ...prev, street: e.target.value }))}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                         placeholder="House #, Street #, Area"
                       />
                     </div>
@@ -272,7 +272,7 @@ const Order = () => {
                         name="city"
                         value={newAddress.city}
                         onChange={(e) => setNewAddress((prev) => ({ ...prev, city: e.target.value }))}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                         placeholder="Lahore"
                       />
                     </div>
@@ -283,7 +283,7 @@ const Order = () => {
                         name="state"
                         value={newAddress.state}
                         onChange={(e) => setNewAddress((prev) => ({ ...prev, state: e.target.value }))}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                         placeholder="Punjab"
                       />
                     </div>
@@ -294,7 +294,7 @@ const Order = () => {
                         name="country"
                         value={newAddress.country}
                         onChange={(e) => setNewAddress((prev) => ({ ...prev, country: e.target.value }))}
-                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500`}
                         placeholder="Pakistan"
                       />
                     </div>
@@ -350,7 +350,7 @@ const Order = () => {
                   <button
                     onClick={updateAddress}
                     disabled={isSavingAddress}
-                    className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    className="w-full bg-indigo-600 cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
                     {isSavingAddress ? 'Saving...' : savedAddress ? 'Update address' : 'Add address'}
                   </button>
@@ -367,8 +367,8 @@ const Order = () => {
 
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white text-black rounded-lg p-6 sticky top-4">
-              <h2 className="text-2xl font-semibold mb-6">Order Summary</h2>
+            <div className="bg-white text-gray-900 rounded-xl border border-gray-200 p-6 shadow-sm sticky top-20">
+              <h2 className="text-xl font-bold mb-6">Order Summary</h2>
 
               {/* Cart Items */}
               <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
@@ -382,7 +382,7 @@ const Order = () => {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${item.price * item.quantity}</p>
+                      <p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p>
                     </div>
                   </div>
                 ))}
@@ -391,15 +391,15 @@ const Order = () => {
               <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between">
                   <span>Price Total</span>
-                  <span>${priceTotal}</span>
+                  <span>${priceTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$30</span>
+                  <span>$30.00</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${priceTotal + 30}</span>
+                  <span>${(priceTotal + 30).toFixed(2)}</span>
                 </div>
               </div>
 
@@ -407,14 +407,14 @@ const Order = () => {
                 <button
                   onClick={handlePlaceOrder}
                   disabled={isLoading || !savedAddress || !selectedPaymentMethod}
-                  className="w-full bg-black cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="w-full bg-indigo-600 cursor-pointer text-white py-3 rounded-lg mt-6 font-semibold hover:bg-indigo-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {!savedAddress ? 'Add Address First' : !selectedPaymentMethod ? 'Select Payment Method' : isLoading ? 'Processing...' : 'Proceed to Pay'}
                 </button>
 
                 <button
                   onClick={backToCart}
-                  className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors"
+                  className="w-full cursor-pointer bg-white border border-gray-200 text-gray-700 py-3 rounded-lg mt-3 font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors"
                 >
                   Back to Cart
                 </button>

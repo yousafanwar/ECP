@@ -1,8 +1,8 @@
 import store, { type RootState } from "@/app/store/store";
 import { setAccessToken, clearAuth, setGuestSession } from "@/app/store/authSlice";
 
-// const API_BASE_URL = "http://localhost:5000";
-const API_BASE_URL = "http://192.168.100.58:5000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "http://localhost:5000";
 
 interface ApiRequestOptions extends RequestInit {
   skipAuth?: boolean; // Skip adding auth header for public endpoints

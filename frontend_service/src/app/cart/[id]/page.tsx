@@ -42,11 +42,11 @@ const Cart = () => {
         const result = await response.json();
         const totalPrice = result.payload.reduce(
           (acc: number, item: cartItemsArr) =>
-            acc + item.price * item.quantity,
+            acc + Number(item.price) * item.quantity,
           0
         );
         setCartItems(result.payload);
-        setPriceTotal(totalPrice);
+        setPriceTotal(parseFloat(totalPrice.toFixed(2)));
       } catch (err) {
         console.error('Fetch failed:', err);
       }
@@ -103,7 +103,7 @@ const Cart = () => {
       );
 
       dispatch(updateCount(response.payload.totalCartQty));
-      setPriceTotal(response.payload.CalCartPrice);
+      setPriceTotal(parseFloat(Number(response.payload.CalCartPrice).toFixed(2)));
     } catch (err: any) {
       console.error('Could not update cart quantity:', err.message ?? err);
     }
@@ -143,16 +143,11 @@ const Cart = () => {
       <h1 className={styles.cartTitle}>Your Shopping Cart</h1>
 
       {error && (
-        <div style={{
-          backgroundColor: '#fee2e2',
-          borderLeft: '4px solid #dc2626',
-          color: '#991b1b',
-          padding: '1rem',
-          marginBottom: '1rem',
-          borderRadius: '0.375rem',
-          fontSize: '0.95rem'
-        }}>
-          <strong>Order Error:</strong> {error}
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          <span><strong>Order Error:</strong> {error}</span>
         </div>
       )}
 
@@ -183,18 +178,18 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className={styles.summaryRow}>
             <span>Price Total</span>
-            <span>${priceTotal}</span>
+            <span>${priceTotal.toFixed(2)}</span>
           </div>
           <div className={styles.summaryRow}>
             <span>Shipping</span>
-            <span>$30</span>
+            <span>$30.00</span>
           </div>
           <div className={styles.summaryTotal}>
             <span>Total</span>
-            <span>${priceTotal + 30}</span>
+            <span>${(priceTotal + 30).toFixed(2)}</span>
           </div>
           <button className={styles.checkoutBtn} onClick={checkOut}>Proceed to Checkout</button>
-          <button onClick={() => { router.push('/') }} className="w-full cursor-pointer bg-transparent border border-black text-black py-3 rounded-lg mt-3 font-medium hover:bg-gray-100 transition-colors">Continue Shopping</button>
+          <button onClick={() => { router.push('/') }} className="w-full cursor-pointer bg-white border-1.5 border-gray-200 text-gray-700 py-3 rounded-lg mt-3 font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors">Continue Shopping</button>
         </div>
       </div>
     </div>
