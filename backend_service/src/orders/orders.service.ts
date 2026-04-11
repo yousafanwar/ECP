@@ -123,7 +123,7 @@ export class OrdersService {
 
             const orderAddress = orderAddressRes.rows[0];
 
-           const orderItemsRes = await this.pool.dbPool().query(`SELECT order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
+            const orderItemsRes = await this.pool.dbPool().query(`SELECT order_items.order_item_id, order_items.quantity, order_items.price, products.name, product_images.image_url, product_images.is_hero 
             FROM orders INNER JOIN order_items ON orders.order_id = order_items.order_id 
             INNER JOIN products ON products.product_id = order_items.product_id 
             INNER JOIN product_images ON product_images.product_id = products.product_id

@@ -11,10 +11,10 @@ export class DbService {
   ) {
     this.pool = new Pool({
       connectionString: this.configService.get<string>('DATABASE_URL'),
-      database: this.configService.get<string>('database'),
-      user: this.configService.get<string>('user'),
-      password: this.configService.get<string>('password'),
-      port: 5432,
+      database: this.configService.get<string>('DB_NAME'),
+      user: this.configService.get<string>('DB_USER'),
+      password: this.configService.get<string>('DB_PASSWORD'),
+      port: this.configService.get<string>('DB_PORT'),
       max: 20,
       idleTimeoutMillis: 30000,
       connectionTimeoutMillis: 10000,

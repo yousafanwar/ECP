@@ -5,6 +5,9 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ConvertGuestDto } from './auth.dto';
 
+const isProduction = process.env.NODE_ENV === 'production';
+const cookieSameSite = isProduction ? 'none' : 'strict';
+
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
@@ -25,8 +28,8 @@ export class AuthController {
     // Set refresh token as httpOnly cookie
     res.cookie('refreshToken', result.refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict',
+      secure: isProduction, // HTTPS only in production
+      sameSite: cookieSameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       path: '/auth', // Only send to /auth routes
     });
@@ -86,8 +89,8 @@ export class AuthController {
     // Set refresh token as httpOnly cookie
     res.cookie('refreshToken', result.refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: cookieSameSite,
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: '/auth',
     });
@@ -114,8 +117,8 @@ export class AuthController {
     // Clear the refresh token cookie
     res.clearCookie('refreshToken', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: isProduction,
+      sameSite: cookieSameSite,
       path: '/auth',
     });
 

@@ -10,6 +10,9 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  const port = Number(process.env.PORT) || 5000;
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const corsOrigins = frontendUrl.split(',').map((origin) => origin.trim());
 
   // Enable HTTP request logging
   app.use((req, res, next) => {
@@ -28,7 +31,7 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
@@ -42,7 +45,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(5000);
-  console.log(`Server is running port 5000`);
+  await app.listen(port);
+  console.log(`Server is running on port ${port}`);
 }
 bootstrap();
