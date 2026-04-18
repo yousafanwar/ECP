@@ -12,7 +12,7 @@ const ProductCard = (props: any) => {
                 <img
                     src={props.product.image_url}
                     alt="Product image"
-                    className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-64 object-contain transition-transform duration-500 group-hover:scale-105"
                 />
                 {props.product.stock_quantity <= 3 && props.product.stock_quantity > 0 && (
                     <span className="absolute top-3 left-3 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">Low Stock</span>
