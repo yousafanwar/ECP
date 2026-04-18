@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { ProductData } from "@/app/interfaces";
 import styles from "../product.module.css";
 import AddToCartBtn from "@/app/components/buttons/AddToCartBtn";
@@ -17,6 +18,47 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [lowQty, setLowQty] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const router = useRouter();
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
+  const [portalReady, setPortalReady] = useState(false);
+
+  const openImagePreview = () => {
+    if (!mainImage) return;
+    setImagePreviewOpen(true);
+  };
+
+  const closeImagePreview = useCallback(() => {
+    setImagePreviewOpen(false);
+    document.body.style.pointerEvents = "none";
+    window.setTimeout(() => {
+      document.body.style.pointerEvents = "";
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    setPortalReady(true);
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.pointerEvents = "";
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!imagePreviewOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [imagePreviewOpen]);
+
+  useEffect(() => {
+    if (!imagePreviewOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeImagePreview();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [imagePreviewOpen, closeImagePreview]);
 
   useEffect(() => {
 
@@ -104,6 +146,7 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
   };
 
   return (
+    <>
     <div className="bg-white min-h-screen">
       {loadError && (
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
@@ -120,7 +163,22 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
       {result &&
         <div className={styles.productContainer}>
           <div className={styles.imageSection}>
-            <img src={mainImage} alt="Product" className={styles.mainImage} />
+            <img
+              src={mainImage}
+              alt="Product"
+              className={styles.mainImage}
+              onClick={openImagePreview}
+              onKeyDown={(e) => {
+                if (!mainImage) return;
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  openImagePreview();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label="View product image full size"
+            />
             {getAllImages().length > 1 && (
               <div className={styles.thumbnailRow}>
                 {getAllImages().map((img, index) => (
@@ -202,6 +260,56 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
         </div>
       }
     </div>
+
+    {portalReady &&
+      imagePreviewOpen &&
+      mainImage &&
+      createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Product image preview"
+          className={styles.imagePreviewOverlay}
+          onClick={closeImagePreview}
+        >
+          <div
+            className={styles.imagePreviewInner}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.imagePreviewFigure}>
+              <button
+                type="button"
+                className={styles.imagePreviewDismiss}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeImagePreview();
+                }}
+                aria-label="Close image preview"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.25"
+                  strokeLinecap="round"
+                  className={styles.imagePreviewDismissIcon}
+                  aria-hidden
+                >
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+              <img
+                src={mainImage}
+                alt=""
+                className={styles.imagePreviewImg}
+              />
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 
