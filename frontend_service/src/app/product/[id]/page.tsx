@@ -15,20 +15,33 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [productId, setProductId] = useState<string>("");
   const [disableIncrement, setDisableIncrement] = useState<boolean>(false);
   const [lowQty, setLowQty] = useState<boolean>(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
 
     const fetchProduct = async () => {
       const { id } = await params;
-      const response = await apiGet(`/product/${id}`);
-      const data = await response.json();
-      if (data.payload.stock_quantity <= 3) {
-        setLowQty(true)
-      };
-      setResult(data.payload);
-      setMainImage(data.payload.heroImageData.image_url);
       setProductId(id);
+      try {
+        const response = await apiGet(`/product/${id}`);
+        const data = await response.json();
+        if (!response.ok || !data?.payload) {
+          setLoadError(data?.message ?? "Product not found.");
+          setResult(null);
+          return;
+        }
+        const p = data.payload;
+        if (p.stock_quantity <= 3) {
+          setLowQty(true);
+        }
+        setResult(p);
+        setMainImage(p.heroImageData?.image_url ?? "");
+        setLoadError(null);
+      } catch {
+        setLoadError("Could not load this product.");
+        setResult(null);
+      }
     };
 
     fetchProduct()
@@ -92,6 +105,18 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
   return (
     <div className="bg-white min-h-screen">
+      {loadError && (
+        <div className="max-w-lg mx-auto px-4 py-16 text-center">
+          <p className="text-gray-700 mb-4">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-white font-medium hover:bg-indigo-700"
+          >
+            Back to home
+          </button>
+        </div>
+      )}
       {result &&
         <div className={styles.productContainer}>
           <div className={styles.imageSection}>
@@ -162,9 +187,15 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
             {result.stock_quantity > 0 && <button className={styles.goToCartBtn} onClick={navigateToCart}>Go to Cart</button>}
             <button className={styles.goToCartBtn} onClick={() => { router.push('/') }}>Continue Shopping</button>
             <div className={styles.productMeta}>
-              <span><strong>Category:</strong> {result.category_title}</span>
-              <span><strong>Brand:</strong> {result.brand_title}</span>
-              <span><strong>About the Brand:</strong> {result.brand_description}</span>
+              {result.category_title != null && result.category_title !== "" && (
+                <span><strong>Category:</strong> {result.category_title}</span>
+              )}
+              {result.brand_title != null && result.brand_title !== "" && (
+                <span><strong>Brand:</strong> {result.brand_title}</span>
+              )}
+              {result.brand_description != null && result.brand_description !== "" && (
+                <span><strong>About the Brand:</strong> {result.brand_description}</span>
+              )}
               <span><strong>SKU:</strong> {result.sku}</span>
             </div>
           </div>

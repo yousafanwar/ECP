@@ -25,7 +25,7 @@ export class CartController {
         try {
             const result = await this.cartService.fetchCartItemsQuantity(cart_id);
             return new ApiResponse(true, "Quantity has been fetched", result);
-        } catch (err) {
+        } catch (err: any) {
             throw new InternalServerErrorException('Error while updating cart quantity', err);
         }
     }
@@ -33,10 +33,10 @@ export class CartController {
 
     // fetch cart for the loggedIn user, returns cart id
     @Get('user/:user_id')
-    async getUserCart(@Param('user_id') user_id: ParseUUIDPipe): Promise<ApiResponse> {
+    async getUserCart(@Param('user_id', ParseUUIDPipe) user_id: string): Promise<ApiResponse> {
         try {
             const result = await this.cartService.getUserCart(user_id);
-            return new ApiResponse(true, result.message || 'Cart retrieved successfully', result);
+            return new ApiResponse(true, 'Cart retrieved successfully', result);
         } catch (err) {
             throw new InternalServerErrorException('Error while fetching the cart');
         }
@@ -73,7 +73,7 @@ export class CartController {
         try {
             const result = await this.cartService.updateCartItemQty(body);
             return new ApiResponse(true, "Quantity has been updated", result);
-        } catch (err) {
+        } catch (err: any) {
             throw new InternalServerErrorException('Error while updating cart quantity', err);
         }
     }
@@ -91,7 +91,7 @@ export class CartController {
         try {
             const result = await this.cartService.fetchProductStock(product_id);
             return new ApiResponse(true, 'Stock retrieved successfully', result);
-        } catch (err) {
+        } catch (err: any) {
             throw new InternalServerErrorException('Could not fetch current stock', err);
         }
 
@@ -103,7 +103,7 @@ export class CartController {
         try {
             const result = await this.cartService.fetchIndCartQty(product_id, cart_id);
             return new ApiResponse(true, 'Cart item quantity retrieved successfully', result);
-        } catch (err) {
+        } catch (err: any) {
             throw new InternalServerErrorException('Could not fetch cart item quantity', err);
         }
     }

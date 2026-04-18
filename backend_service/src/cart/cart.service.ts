@@ -52,7 +52,7 @@ export class CartService {
         await client.query('COMMIT');
         return { message: 'Cart created and item added', payload: { cartId, cart_item_id: itemRes.rows[0].cart_item_id } };
       }
-    } catch (err) {
+    } catch (err: any) {
       await client.query('ROLLBACK');
       console.error('Error adding to cart:', err);
       return { message: 'Database error', error: err.message };
@@ -102,10 +102,14 @@ export class CartService {
     }
   }
 
-  async getUserCart(user_id) {
+  async getUserCart(user_id: string) {
     try {
-      const cartRes = await this.dbService.dbPool().query(`SELECT cart_id FROM public.cart where user_id = $1;`, [user_id]);
-      return cartRes.rows[0];
+      const cartRes = await this.dbService.dbPool().query(
+        `SELECT cart_id FROM public.cart WHERE user_id = $1;`,
+        [user_id],
+      );
+      const row = cartRes.rows[0];
+      return row ?? { cart_id: null };
     } catch (err) {
       console.error('Error while retrieving the cart', err);
       throw err;
@@ -206,7 +210,7 @@ export class CartService {
                                           WHERE ci.cart_id = $1;`, [cart_id]);
       console.log('res.rows[0]', res.rows[0])
       return Number(res.rows[0].total);
-    } catch (err) {
+    } catch (err: any) {
       throw new Error(err);
     }
   }

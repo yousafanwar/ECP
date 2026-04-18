@@ -5,13 +5,14 @@ export interface HeroImage {
 }
 
 export interface GetIndProduct {
-    brand_description: string;
-    brand_id: string;
-    brand_title: string;
+    brand_description: string | null;
+    brand_id: string | null;
+    brand_title: string | null;
     category_id: string;
-    category_title: string;
+    category_title: string | null;
     description: string;
     heroImageData: HeroImage;
+    images?: HeroImage[];
     price: number;
     product_title: string;
     sku: number;

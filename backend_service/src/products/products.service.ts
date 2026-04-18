@@ -116,7 +116,19 @@ export class ProductsService {
     }
 
     async getIndProduct(productId: string): Promise<GetIndProduct> {
-        const response = await this.pool.dbPool().query(`SELECT products.name as product_title, products.price, products.sku, products.stock_quantity, products.description, products.category_id, products.brand_id, products.created_at, products.updated_at, product_images.image_id, product_images.image_url, product_images.is_hero, brands.name as brand_title, brands.description as brand_description, categories.name as category_title FROM public.products inner join public.product_images on products.product_id = product_images.product_id inner join public.categories on products.category_id = categories.category_id inner join public.brands on products.brand_id = brands.brand_id where products.product_id = $1;`, [productId]);
+        const response = await this.pool.dbPool().query(
+            `SELECT products.name AS product_title, products.price, products.sku, products.stock_quantity,
+                    products.description, products.category_id, products.brand_id, products.created_at, products.updated_at,
+                    product_images.image_id, product_images.image_url, product_images.is_hero,
+                    brands.name AS brand_title, brands.description AS brand_description,
+                    categories.name AS category_title
+             FROM public.products
+             INNER JOIN public.product_images ON products.product_id = product_images.product_id
+             LEFT JOIN public.categories ON products.category_id = categories.category_id
+             LEFT JOIN public.brands ON products.brand_id = brands.brand_id
+             WHERE products.product_id = $1`,
+            [productId],
+        );
         if (response.rows.length === 0) {
             throw new NotFoundException(`Product with the id: '${productId}' not found`);
         }
@@ -125,12 +137,12 @@ export class ProductsService {
             .filter(r => !r.is_hero)
             .map(r => ({ image_id: r.image_id, image_url: r.image_url, is_hero: r.is_hero }));
 
-        const dataObj = {
-            brand_description: heroRow.brand_description,
-            brand_id: heroRow.brand_id,
-            brand_title: heroRow.brand_title,
+        const dataObj: GetIndProduct = {
+            brand_description: heroRow.brand_description ?? null,
+            brand_id: heroRow.brand_id ?? null,
+            brand_title: heroRow.brand_title ?? null,
             category_id: heroRow.category_id,
-            category_title: heroRow.category_title,
+            category_title: heroRow.category_title ?? null,
             description: heroRow.description,
             heroImageData: { image_id: heroRow.image_id, image_url: heroRow.image_url, is_hero: heroRow.is_hero },
             images: additionalImages,

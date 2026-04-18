@@ -4,11 +4,11 @@ export interface ProductData {
     sku: number;
     stock_quantity: number;
     description: string;
-    category_id: number;
-    category_title: string;
-    brand_id: number;
-    brand_title: string;
-    brand_description: string;
+    category_id: string;
+    category_title: string | null;
+    brand_id: string | null;
+    brand_title: string | null;
+    brand_description: string | null;
     heroImageData: HeroImage;
     images?: HeroImage[];
     created_at: string;
