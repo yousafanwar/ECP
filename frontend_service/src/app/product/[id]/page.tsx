@@ -5,6 +5,7 @@ import styles from "../product.module.css";
 import AddToCartBtn from "@/app/components/buttons/AddToCartBtn";
 import { useRouter } from "next/navigation";
 import { apiGet } from "@/lib/api";
+import { formatPrice } from "@/lib/formatPrice";
 
 const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
 
@@ -125,7 +126,7 @@ const ProductPage = ({ params }: { params: Promise<{ id: string }> }) => {
               )}
             </div>
             <h1 className={styles.productTitle}>{result.product_title}</h1>
-            <p className={styles.productPrice}>${result.price}</p>
+            <p className={styles.productPrice}>{formatPrice(result.price)}</p>
             <p className={styles.productDescription}>
               {result.description}
             </p>

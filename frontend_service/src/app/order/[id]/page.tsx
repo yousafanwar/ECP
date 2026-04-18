@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { apiGet, apiPut, apiDelete } from "@/lib/api";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { formatPrice, SHIPPING_FLAT_RS } from "@/lib/formatPrice";
 
 interface CartItem {
   name: string;
@@ -173,7 +174,7 @@ const Order = () => {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p>
+                      <p className="text-sm font-semibold">{formatPrice(Number(item.price) * item.quantity)}</p>
                     </div>
                   </div>
                 ))}
@@ -182,15 +183,15 @@ const Order = () => {
               <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between">
                   <span>Price Total</span>
-                  <span>${priceTotal.toFixed(2)}</span>
+                  <span>{formatPrice(priceTotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$30.00</span>
+                  <span>{formatPrice(SHIPPING_FLAT_RS)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${(priceTotal + 30).toFixed(2)}</span>
+                  <span>{formatPrice(priceTotal + SHIPPING_FLAT_RS)}</span>
                 </div>
               </div>
 
@@ -382,7 +383,7 @@ const Order = () => {
                     <div className="flex-1">
                       <p className="font-medium text-sm">{item.name}</p>
                       <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                      <p className="text-sm font-semibold">${(Number(item.price) * item.quantity).toFixed(2)}</p>
+                      <p className="text-sm font-semibold">{formatPrice(Number(item.price) * item.quantity)}</p>
                     </div>
                   </div>
                 ))}
@@ -391,15 +392,15 @@ const Order = () => {
               <div className="border-t pt-4 space-y-3">
                 <div className="flex justify-between">
                   <span>Price Total</span>
-                  <span>${priceTotal.toFixed(2)}</span>
+                  <span>{formatPrice(priceTotal)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
-                  <span>$30.00</span>
+                  <span>{formatPrice(SHIPPING_FLAT_RS)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-3">
                   <span>Total</span>
-                  <span>${(priceTotal + 30).toFixed(2)}</span>
+                  <span>{formatPrice(priceTotal + SHIPPING_FLAT_RS)}</span>
                 </div>
               </div>
 

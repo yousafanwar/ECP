@@ -35,7 +35,10 @@ export class UsersService {
 
     async createUser(userData: createNewUserDTO) {
         try {
-            let response = await this.pool.dbPool().query(`INSERT INTO public.users (first_name, last_name, email, "password") VALUES($1, $2, $3, $4) returning user_id, first_name, last_name, email;`, [userData.firstName, userData.lastName, userData.email, userData.password]);
+            let response = await this.pool.dbPool().query(
+                `INSERT INTO public.users (first_name, last_name, email, "password", phone) VALUES($1, $2, $3, $4, $5) returning user_id, first_name, last_name, email;`,
+                [userData.firstName, userData.lastName, userData.email, userData.password, userData.phone ?? null],
+            );
             console.log('create user response', response);
             return {
                 message: 'User created successfully',
@@ -169,13 +172,14 @@ export class UsersService {
         password: string,
         firstName: string,
         lastName: string,
+        phone: string,
     ) {
         const response = await this.pool.dbPool().query(
             `UPDATE public.users
-             SET first_name = $1, last_name = $2, email = $3, password = $4, is_guest = false, updated_at = CURRENT_TIMESTAMP
-             WHERE user_id = $5 AND is_guest = true
+             SET first_name = $1, last_name = $2, email = $3, password = $4, phone = $5, is_guest = false, updated_at = CURRENT_TIMESTAMP
+             WHERE user_id = $6 AND is_guest = true
              RETURNING user_id, first_name, last_name, email, is_guest;`,
-            [firstName, lastName, email, password, guestId],
+            [firstName, lastName, email, password, phone, guestId],
         );
 
         if (response.rows.length === 0) {

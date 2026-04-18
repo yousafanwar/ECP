@@ -10,6 +10,8 @@ export const ERROR_MESSAGES = {
   PASSWORD_TOO_SHORT: "Password must be at least 6 characters",
   PASSWORDS_NOT_MATCH: "Passwords do not match",
   CONFIRM_PASSWORD_REQUIRED: "Please confirm your password",
+  PHONE_REQUIRED: "Phone number is required",
+  PHONE_INVALID: "Enter a valid international number starting with + and your country code (10–15 digits after +)",
   REGISTRATION_FAILED: "Registration failed",
   REGISTRATION_ERROR: "An error occurred during registration. Please try again.",
   LOGIN_FAILED: "Login failed",

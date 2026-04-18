@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { apiGet, apiDelete, apiCall } from "@/lib/api";
 import styles from "../admin.module.css";
+import { formatPrice } from "@/lib/formatPrice";
 
 interface Order {
   order_id: string;
@@ -277,7 +278,7 @@ export default function OrderListPanel() {
                   <td className={styles.td}>{o.first_name} {o.last_name}</td>
                   <td className={styles.td}>{o.email}</td>
                   <td className={styles.td}>{o.item_count}</td>
-                  <td className={styles.td}>${o.total}</td>
+                  <td className={styles.td}>{formatPrice(o.total)}</td>
                   <td className={styles.td}>
                     <div className="relative" ref={openDropdownId === o.order_id ? dropdownRef : null}>
                       <button
@@ -386,7 +387,7 @@ export default function OrderListPanel() {
                           <p className="text-gray-900 text-sm font-medium">{item.name}</p>
                           <p className="text-gray-400 text-xs">Qty: {item.quantity}</p>
                         </div>
-                        <p className="text-gray-900 text-sm">${item.price * item.quantity}</p>
+                        <p className="text-gray-900 text-sm">{formatPrice(item.price * item.quantity)}</p>
                       </div>
                     ))}
                   </div>

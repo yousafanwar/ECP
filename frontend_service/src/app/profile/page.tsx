@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiGet, apiPut } from '@/lib/api';
 import { useAuth } from '@/lib/hooks/useAuth';
 import styles from './profile.module.css';
+import { formatPrice } from '@/lib/formatPrice';
 
 interface UserProfile {
   user_id: string;
@@ -240,7 +241,7 @@ export default function ProfilePage() {
                     </div>
                     <div className={styles.orderMeta}>
                       <span className={styles.orderItemCount}>{order.item_count} item{Number(order.item_count) !== 1 ? 's' : ''}</span>
-                      <span className={styles.orderTotal}>${Number(order.total).toFixed(2)}</span>
+                      <span className={styles.orderTotal}>{formatPrice(order.total)}</span>
                       <span className={`${styles.statusBadge} ${statusClass(order.status)}`}>{order.status}</span>
                       <Link href={`/order/${order.order_id}`} className={styles.viewOrderBtn}>View</Link>
                     </div>

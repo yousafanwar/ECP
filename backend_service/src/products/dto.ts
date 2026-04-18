@@ -30,6 +30,10 @@ export class AddProductDTO {
     @IsUUID()
     brand_id?: string;
 
+    @IsOptional()
+    @IsString()
+    imagePublicId?: string;
+
     @IsString()
     @IsNotEmpty()
     image_url!: string;

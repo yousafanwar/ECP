@@ -158,7 +158,7 @@ export default function EditProductPanel() {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price (Rs)</label>
                 <input type="number" min="0" step="0.01" value={formData.price} className={inputCls}
                   onChange={e => setFormData(prev => ({ ...prev!, price: e.target.value }))}
                 />

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { apiGet, apiPost } from "@/lib/api";
 import { OrderItem, Address, OrderSummary } from "@/app/interfaces";
 import { resetCount } from "@/app/store/cartSlice";
+import { formatPrice, SHIPPING_FLAT_RS } from "@/lib/formatPrice";
 
 const PaymentPage = () => {
     const router = useRouter();
@@ -46,7 +47,7 @@ const PaymentPage = () => {
                     orderId: orderId as string,
                     items: payload.orderItems,
                     priceTotal: total,
-                    shippingCost: 30,
+                    shippingCost: SHIPPING_FLAT_RS,
                     paymentMethod: payload.paymentMethod || "",
                     address: payload.orderAddress,
                 });
@@ -117,12 +118,12 @@ const PaymentPage = () => {
                     </p>
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-lg p-4 mb-6 text-left text-sm">
                         <p className="font-semibold mb-1">💰 Cash on Delivery</p>
-                        <p>Please keep <strong>${total}</strong> ready at the time of delivery.</p>
+                        <p>Please keep <strong>{formatPrice(total)}</strong> ready at the time of delivery.</p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Amount Due on Delivery</span>
-                            <span className="font-bold text-gray-900">${total}</span>
+                            <span className="font-bold text-gray-900">{formatPrice(total)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500">Payment Method</span>
@@ -214,7 +215,7 @@ const PaymentPage = () => {
                                     <p><strong>📦 How it works:</strong></p>
                                     <ul className="list-disc list-inside space-y-1 mt-1">
                                         <li>Your order will be packed and dispatched.</li>
-                                        <li>Pay <strong>${total}</strong> in cash upon delivery.</li>
+                                        <li>Pay <strong>{formatPrice(total)}</strong> in cash upon delivery.</li>
                                         <li>Please keep exact change ready.</li>
                                     </ul>
                                 </div>
@@ -246,7 +247,7 @@ const PaymentPage = () => {
                                         <div className="flex-1">
                                             <p className="text-sm font-medium leading-tight">{item.name}</p>
                                             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
-                                            <p className="text-sm font-semibold">${item.price * item.quantity}</p>
+                                            <p className="text-sm font-semibold">{formatPrice(item.price * item.quantity)}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -266,15 +267,15 @@ const PaymentPage = () => {
                             <div className="border-t pt-4 space-y-2 text-sm">
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Subtotal</span>
-                                    <span>${order.priceTotal}</span>
+                                    <span>{formatPrice(order.priceTotal)}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-500">Shipping</span>
-                                    <span>${order.shippingCost}</span>
+                                    <span>{formatPrice(order.shippingCost)}</span>
                                 </div>
                                 <div className="flex justify-between text-base font-bold border-t pt-2">
                                     <span>Total</span>
-                                    <span>${total}</span>
+                                    <span>{formatPrice(total)}</span>
                                 </div>
                             </div>
 
@@ -287,9 +288,9 @@ const PaymentPage = () => {
                                 {isProcessing
                                     ? "Processing..."
                                     : paymentMethod === "cod"
-                                        ? `Place Order • $${total}`
+                                        ? `Place Order • ${formatPrice(total)}`
                                         : paymentMethod
-                                            ? `Pay $${total}`
+                                            ? `Pay ${formatPrice(total)}`
                                             : "Select a Payment Method"}
                             </button>
 

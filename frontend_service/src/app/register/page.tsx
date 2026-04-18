@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import AuthInput from "@/app/components/AuthInput";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "@/app/store/authSlice";
 import { RootState } from "@/app/store/store";
-import { validateRegisterForm } from "@/lib/validations/authValidation";
+import { validateRegisterForm, normalizeRegisterPhone, formatPhoneAsYouType } from "@/lib/validations/authValidation";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 import { SUCCESS_MESSAGES } from "@/lib/constants/successMessages";
 import { apiPublic, convertGuestToUser } from "@/lib/api";
@@ -18,6 +17,7 @@ export default function RegisterPage() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
+    const [phone, setPhone] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
@@ -28,12 +28,14 @@ export default function RegisterPage() {
 
     const handleRegister = async () => {
         // Validate form
+        const phoneNorm = normalizeRegisterPhone(phone);
         const validationError = validateRegisterForm({
             firstName,
             lastName,
             email,
             password,
             confirmPassword,
+            phone: phoneNorm,
         });
 
         if (validationError) {
@@ -55,6 +57,7 @@ export default function RegisterPage() {
                     lastName,
                     email,
                     password,
+                    phone: phoneNorm,
                 });
             } else {
                 // Standard registration
@@ -65,6 +68,7 @@ export default function RegisterPage() {
                         lastName,
                         email,
                         password,
+                        phone: phoneNorm,
                     }),
                 });
             }
@@ -176,6 +180,18 @@ export default function RegisterPage() {
                             handleInputChange();
                         }}
                         hasError={error === "Email is required" || error === "Please enter a valid email address"}
+                    />
+
+                    <AuthInput
+                        label="Phone number"
+                        type="tel"
+                        placeholder="+92 3xx xxxxxxx"
+                        value={phone}
+                        onChange={(e) => {
+                            setPhone(formatPhoneAsYouType(e.target.value));
+                            handleInputChange();
+                        }}
+                        hasError={error === ERROR_MESSAGES.PHONE_REQUIRED || error === ERROR_MESSAGES.PHONE_INVALID}
                     />
 
                     <AuthInput

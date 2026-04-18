@@ -310,6 +310,7 @@ export const convertGuestToUser = async (registrationData: {
   password: string;
   firstName: string;
   lastName: string;
+  phone: string;
 }): Promise<Response> => {
   const guestId = getGuestId();
 

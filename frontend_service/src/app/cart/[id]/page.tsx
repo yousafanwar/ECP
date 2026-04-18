@@ -9,6 +9,7 @@ import { updateCart } from "@/app/helperFunctions";
 import { useParams } from "next/navigation";
 import { apiGet, apiDelete, apiPost } from "@/lib/api";
 import { useAuth } from "@/lib/hooks/useAuth";
+import { formatPrice, SHIPPING_FLAT_RS } from "@/lib/formatPrice";
 
 const Cart = () => {
 
@@ -162,7 +163,7 @@ const Cart = () => {
               />
               <div className={styles.cartItemDetails}>
                 <h2 className={styles.cartItemName}>{item.name}</h2>
-                <p className={styles.cartItemPrice}>${item.price}</p>
+                <p className={styles.cartItemPrice}>{formatPrice(item.price)}</p>
                 <div className={styles.cartItemQuantity}>
                   <button onClick={() => { updateCartCount(item.product_id, item.cart_item_id, 'decrement') }} className={styles.qtyBtn}>-</button>
                   <span className={styles.qtyCount}>{item.quantity}</span>
@@ -178,15 +179,15 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className={styles.summaryRow}>
             <span>Price Total</span>
-            <span>${priceTotal.toFixed(2)}</span>
+            <span>{formatPrice(priceTotal)}</span>
           </div>
           <div className={styles.summaryRow}>
             <span>Shipping</span>
-            <span>$30.00</span>
+            <span>{formatPrice(SHIPPING_FLAT_RS)}</span>
           </div>
           <div className={styles.summaryTotal}>
             <span>Total</span>
-            <span>${(priceTotal + 30).toFixed(2)}</span>
+            <span>{formatPrice(priceTotal + SHIPPING_FLAT_RS)}</span>
           </div>
           <button className={styles.checkoutBtn} onClick={checkOut}>Proceed to Checkout</button>
           <button onClick={() => { router.push('/') }} className="w-full cursor-pointer bg-white border-1.5 border-gray-200 text-gray-700 py-3 rounded-lg mt-3 font-medium hover:border-indigo-300 hover:text-indigo-600 transition-colors">Continue Shopping</button>

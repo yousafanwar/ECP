@@ -65,9 +65,9 @@ export class AuthService {
         };
     }
 
-    async register(email: string, password: string, firstName: string, lastName: string) {
+    async register(email: string, password: string, firstName: string, lastName: string, phone: string) {
         const hashed = await bcrypt.hash(password, 10);
-        return this.usersService.createUser({ email, password: hashed, firstName, lastName });
+        return this.usersService.createUser({ email, password: hashed, firstName, lastName, phone });
     }
 
     async revokeUserTokens(userId: string): Promise<void> {
@@ -95,6 +95,7 @@ export class AuthService {
         password: string,
         firstName: string,
         lastName: string,
+        phone: string,
     ) {
         // Verify the guest user exists and is actually a guest
         const guestUser = await this.usersService.getUserById(guestId);
@@ -111,6 +112,7 @@ export class AuthService {
             hashedPassword,
             firstName,
             lastName,
+            phone,
         );
 
         // Generate a new token with full user claims

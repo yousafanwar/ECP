@@ -1,4 +1,4 @@
-import { VALIDATION_RULES, FIELD_LABELS } from "@/lib/constants/validationRules";
+import { VALIDATION_RULES } from "@/lib/constants/validationRules";
 import { ERROR_MESSAGES } from "@/lib/constants/errorMessages";
 
 interface RegisterFormData {
@@ -7,6 +7,8 @@ interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  /** Full E.164-style number, e.g. +12025550123 */
+  phone: string;
 }
 
 interface LoginFormData {
@@ -14,8 +16,52 @@ interface LoginFormData {
   password: string;
 }
 
+/** Strip spaces and common separators; keeps leading + and digits (for submit / validation). */
+export const normalizeRegisterPhone = (raw: string): string => raw.trim().replace(/[\s\-().]/g, "");
+
+/**
+ * Formats as the user types: Pakistan +92 → "+92 3xx xxxxxxx" (3 + 7 national digits);
+ * NANP +1 → "+1 XXX XXX XXXX"; otherwise "+XXX XXX …" in groups of three.
+ */
+export const formatPhoneAsYouType = (input: string): string => {
+  const trimmed = input.trim();
+  const hasPlus = trimmed.startsWith("+");
+  let digits = input.replace(/\D/g, "");
+  if (!digits && !hasPlus) return "";
+  if (!digits && hasPlus) return "+";
+  if (digits.length > 15) digits = digits.slice(0, 15);
+
+  if (digits.startsWith("92")) {
+    const national = digits.slice(2, 12);
+    let out = "+92";
+    const g1 = national.slice(0, 3);
+    const g2 = national.slice(3, 10);
+    if (g1) out += " " + g1;
+    if (g2) out += " " + g2;
+    return out;
+  }
+
+  if (digits.startsWith("1")) {
+    const nanp = digits.slice(1, 11);
+    let out = "+1";
+    const a = nanp.slice(0, 3);
+    const b = nanp.slice(3, 6);
+    const c = nanp.slice(6, 10);
+    if (a) out += " " + a;
+    if (b) out += " " + b;
+    if (c) out += " " + c;
+    return out;
+  }
+
+  let out = "+";
+  for (let i = 0; i < digits.length; i += 3) {
+    out += (i > 0 ? " " : "") + digits.slice(i, i + 3);
+  }
+  return out;
+};
+
 export const validateRegisterForm = (data: RegisterFormData): string => {
-  const { firstName, lastName, email, password, confirmPassword } = data;
+  const { firstName, lastName, email, password, confirmPassword, phone } = data;
 
   // First Name validation
   if (!firstName.trim()) {
@@ -39,6 +85,14 @@ export const validateRegisterForm = (data: RegisterFormData): string => {
   }
   if (!VALIDATION_RULES.EMAIL_REGEX.test(email)) {
     return ERROR_MESSAGES.EMAIL_INVALID;
+  }
+
+  const phoneNorm = normalizeRegisterPhone(phone);
+  if (!phoneNorm) {
+    return ERROR_MESSAGES.PHONE_REQUIRED;
+  }
+  if (!VALIDATION_RULES.PHONE_E164_REGEX.test(phoneNorm)) {
+    return ERROR_MESSAGES.PHONE_INVALID;
   }
 
   // Password validation

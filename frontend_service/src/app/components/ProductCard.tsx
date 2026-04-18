@@ -1,6 +1,7 @@
 'use client';
 import AddToCartBtn from "./buttons/AddToCartBtn";
 import { useRouter } from "next/navigation";
+import { formatPrice } from "@/lib/formatPrice";
 
 const ProductCard = (props: any) => {
     const router = useRouter();
@@ -38,7 +39,7 @@ const ProductCard = (props: any) => {
                 </h2>
                 <p className="text-xs text-gray-400 mb-3 line-clamp-2">{props.product.description}</p>
                 <div className="flex justify-between items-center pt-3 border-t border-gray-50">
-                    <span className="text-lg font-bold text-gray-900">${props.product.price}</span>
+                    <span className="text-lg font-bold text-gray-900">{formatPrice(props.product.price)}</span>
                     <AddToCartBtn product_id={props.product.product_id} qty={1} />
                 </div>
             </div>

@@ -3,7 +3,7 @@ import type { Response } from 'express';
 import type { Request as ExpressRequest } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ConvertGuestDto } from './auth.dto';
+import { ConvertGuestDto, RegisterDto } from './auth.dto';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const cookieSameSite = isProduction ? 'none' : 'strict';
@@ -13,9 +13,9 @@ export class AuthController {
   constructor(private authService: AuthService) { }
 
   @Post('register')
-  register(@Body() body: { email: string; password: string, firstName: string, lastName: string }) {
+  register(@Body() body: RegisterDto) {
     console.log('register method body', body);
-    return this.authService.register(body.email, body.password, body.firstName, body.lastName);
+    return this.authService.register(body.email, body.password, body.firstName, body.lastName, body.phone);
   }
 
   @Post('login')
@@ -84,6 +84,7 @@ export class AuthController {
       body.password,
       body.firstName,
       body.lastName,
+      body.phone,
     );
 
     // Set refresh token as httpOnly cookie

@@ -77,7 +77,7 @@ export default function AddProductPanel() {
       stock_quantity: Number(formData.stockQuantity),
       description: formData.description,
       category_id: formData.category,
-      brand_id: formData.brand || null,
+      brand_id: formData.brand || undefined,
       image_url: formData.fileUpload,
       is_hero: true,
     };
@@ -111,7 +111,7 @@ export default function AddProductPanel() {
           </div>
 
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Price (Rs)</label>
             <input name="price" type="number" min="0" step="0.01" placeholder="0.00"
               value={formData.price}
               onChange={e => setFormData(prev => ({ ...prev, price: e.target.value }))}
