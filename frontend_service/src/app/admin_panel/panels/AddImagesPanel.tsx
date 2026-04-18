@@ -8,16 +8,18 @@ import { Spinner, FullPageSpinner } from "../../components/LoadingSpinners";
 import { apiGet, apiPost } from "@/lib/api";
 import styles from "../admin.module.css";
 
-const menuBtnCls = "flex w-full items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
+const menuBtnCls = "flex w-full items-center justify-between gap-2 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
 const menuItemsCls = "absolute z-10 mt-1 w-full rounded-md bg-white ring-1 ring-gray-200 max-h-60 overflow-y-auto shadow-lg";
 const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900";
+const productMenuOptCls = "flex w-full items-center gap-2 text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 min-h-[2.75rem]";
+const heroThumbCls = "h-8 w-8 shrink-0 rounded object-cover ring-1 ring-gray-200 bg-gray-100";
 
-interface ProductListItem { product_id: string; name: string; }
+interface ProductListItem { product_id: string; name: string; image_url: string; }
 interface UploadedImage { url: string; thumbnail: string; }
 
 export default function AddImagesPanel() {
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string } | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string; image_url: string } | null>(null);
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -66,8 +68,13 @@ export default function AddImagesPanel() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Select product</label>
           <Menu as="div" className="relative max-w-sm">
             <MenuButton type="button" onClick={fetchProducts} className={menuBtnCls}>
-              {selectedProduct?.name || "Select a product"}
-              <span className="flex items-center gap-1">
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                {selectedProduct?.image_url ? (
+                  <img src={selectedProduct.image_url} alt="" className={heroThumbCls} width={32} height={32} />
+                ) : null}
+                <span className="truncate">{selectedProduct?.name || "Select a product"}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1">
                 {loadingProducts && <Spinner />}
                 <ChevronDownIcon className="size-4 text-gray-400" />
               </span>
@@ -75,9 +82,12 @@ export default function AddImagesPanel() {
             <MenuItems className={menuItemsCls}>
               {products.map(p => (
                 <MenuItem key={p.product_id}>
-                  <button type="button" className={menuOptCls}
-                    onClick={() => setSelectedProduct({ id: p.product_id, name: p.name })}
-                  >{p.name}</button>
+                  <button type="button" className={productMenuOptCls}
+                    onClick={() => setSelectedProduct({ id: p.product_id, name: p.name, image_url: p.image_url })}
+                  >
+                    <img src={p.image_url} alt="" className={heroThumbCls} width={32} height={32} />
+                    <span className="min-w-0 truncate">{p.name}</span>
+                  </button>
                 </MenuItem>
               ))}
             </MenuItems>

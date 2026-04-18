@@ -7,13 +7,16 @@ import { apiGet, apiPut } from "@/lib/api";
 import styles from "../admin.module.css";
 
 const inputCls = "block w-full rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 outline outline-1 outline-gray-200 focus:outline-2 focus:outline-indigo-500";
-const menuBtnCls = "flex w-full items-center justify-between rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
+const menuBtnCls = "flex w-full items-center justify-between gap-2 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-900 ring-1 ring-gray-200 hover:bg-gray-100";
 const menuItemsCls = "absolute z-10 mt-1 w-full rounded-md bg-white ring-1 ring-gray-200 max-h-60 overflow-y-auto shadow-lg";
 const menuOptCls = "block w-full text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900";
+const productMenuOptCls = "flex w-full items-center gap-2 text-left px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 min-h-[2.75rem]";
+const heroThumbCls = "h-8 w-8 shrink-0 rounded object-cover ring-1 ring-gray-200 bg-gray-100";
 
 interface ProductListItem {
   product_id: string;
   name: string;
+  image_url: string;
 }
 
 interface EditFormData {
@@ -28,7 +31,7 @@ interface EditFormData {
 
 export default function EditProductPanel() {
   const [products, setProducts] = useState<ProductListItem[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string } | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<{ id: string; name: string; image_url: string } | null>(null);
   const [formData, setFormData] = useState<EditFormData | null>(null);
   const [categories, setCategories] = useState<Array<{ category_id: string; name: string }>>([]);
   const [brands, setBrands] = useState<Array<{ brand_id: number; name: string }>>([]);
@@ -68,23 +71,28 @@ export default function EditProductPanel() {
     finally { set('brands', false); }
   };
 
-  const loadProduct = async (productId: string, productName: string) => {
+  const loadProduct = async (listItem: ProductListItem) => {
     try {
       set('product', true);
-      setSelectedProduct({ id: productId, name: productName });
-      const res = await apiGet(`/product/${productId}`);
+      setSelectedProduct({ id: listItem.product_id, name: listItem.name, image_url: listItem.image_url });
+      const res = await apiGet(`/product/${listItem.product_id}`);
       const data = await res.json();
-      const p = data.payload;
+      const detail = data.payload;
       setFormData({
-        name: p.product_title,
-        price: String(p.price),
-        sku: String(p.sku),
-        stock_quantity: String(p.stock_quantity),
-        description: p.description,
-        category_id: p.category_id,
-        brand_id: p.brand_id,
+        name: detail.product_title,
+        price: String(detail.price),
+        sku: String(detail.sku),
+        stock_quantity: String(detail.stock_quantity),
+        description: detail.description,
+        category_id: detail.category_id,
+        brand_id: detail.brand_id,
       });
-      setSelectedLabels({ category: p.category_title, brand: p.brand_title });
+      setSelectedLabels({ category: detail.category_title, brand: detail.brand_title });
+      setSelectedProduct({
+        id: listItem.product_id,
+        name: detail.product_title,
+        image_url: detail.heroImageData.image_url,
+      });
     } catch (err) { console.error(err); }
     finally { set('product', false); }
   };
@@ -128,8 +136,13 @@ export default function EditProductPanel() {
           <label className="block text-sm font-medium text-gray-700 mb-1">Select product to edit</label>
           <Menu as="div" className="relative max-w-sm">
             <MenuButton type="button" onClick={fetchProducts} className={menuBtnCls}>
-              {selectedProduct?.name || "Select a product"}
-              <span className="flex items-center gap-1">
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                {selectedProduct?.image_url ? (
+                  <img src={selectedProduct.image_url} alt="" className={heroThumbCls} width={32} height={32} />
+                ) : null}
+                <span className="truncate">{selectedProduct?.name || "Select a product"}</span>
+              </span>
+              <span className="flex shrink-0 items-center gap-1">
                 {loading.products && <Spinner />}
                 <ChevronDownIcon className="size-4 text-gray-400" />
               </span>
@@ -137,9 +150,12 @@ export default function EditProductPanel() {
             <MenuItems className={menuItemsCls}>
               {products.map(p => (
                 <MenuItem key={p.product_id}>
-                  <button type="button" className={menuOptCls}
-                    onClick={() => loadProduct(p.product_id, p.name)}
-                  >{p.name}</button>
+                  <button type="button" className={productMenuOptCls}
+                    onClick={() => loadProduct(p)}
+                  >
+                    <img src={p.image_url} alt="" className={heroThumbCls} width={32} height={32} />
+                    <span className="min-w-0 truncate">{p.name}</span>
+                  </button>
                 </MenuItem>
               ))}
             </MenuItems>
