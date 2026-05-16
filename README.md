@@ -15,6 +15,8 @@ ECP is split into two services:
 ```text
 ECP/
 |- backend_service/
+|  |- Dockerfile
+|  `- .dockerignore
 |- frontend_service/
 |- test_refresh_tokens.ps1
 `- test_refresh_tokens.sh
@@ -25,6 +27,7 @@ ECP/
 - Node.js 20+
 - npm 10+
 - PostgreSQL database (or a hosted PostgreSQL connection string)
+- Docker (optional) — for building and running the backend as a container
 
 ## 1) Backend Setup (`backend_service`)
 
@@ -57,6 +60,24 @@ npm run start:dev
 ```
 
 Backend default URL: [http://localhost:5000](http://localhost:5000)
+
+### Backend Docker image
+
+The API can be built as a production image from `backend_service/Dockerfile` (multi-stage: install deps, `nest build`, run with production `node_modules` only).
+
+**Build** (from the repository root):
+
+```bash
+docker build -t ecp-backend ./backend_service
+```
+
+**Run** (pass the same variables you would use in `.env`; keep secrets out of git — on a server, use an env file that only exists on the host):
+
+```bash
+docker run -d --name ecp-api -p 5000:5000 --env-file .env --restart unless-stopped ecp-backend
+```
+
+For a real deployment behind HTTPS (recommended for cross-origin cookies with the Vercel frontend), set `NODE_ENV=production`, point `FRONTEND_URL` at your Next.js origin, and terminate TLS with a reverse proxy (for example Caddy or Nginx) in front of the container instead of exposing plain HTTP publicly.
 
 ## 2) Frontend Setup (`frontend_service`)
 
